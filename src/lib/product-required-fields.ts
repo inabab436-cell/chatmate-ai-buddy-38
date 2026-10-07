@@ -47,3 +47,35 @@ export function basicFieldsFilled(input: {
       input.rows > 0,
   );
 }
+
+/** Size is mandatory on every colour row. */
+export function requireSize(raw: string, colorLabel: string): string {
+  const value = String(raw ?? "").trim();
+  if (value === "") throw new Error(`اكتب المقاس للون «${colorLabel || "بدون اسم"}».`);
+  return value;
+}
+
+/**
+ * Keys of mandatory fields that are still empty, used to paint them red when
+ * the merchant presses save. Row keys: `label-i`, `size-i`, `qty-i`.
+ */
+export function missingRequiredFields(input: {
+  name: string;
+  material: string;
+  price: string;
+  rows: { label: string; size: string; quantity: string }[];
+}): Set<string> {
+  const out = new Set<string>();
+  if (!input.name.trim()) out.add("name");
+  if (!input.material.trim()) out.add("material");
+  const p = Number(String(input.price).trim());
+  if (String(input.price).trim() === "" || !Number.isFinite(p) || p <= 0) out.add("price");
+  if (input.rows.length === 0) out.add("rows");
+  input.rows.forEach((r, i) => {
+    if (!r.label.trim()) out.add(`label-${i}`);
+    if (!r.size.trim()) out.add(`size-${i}`);
+    const q = String(r.quantity).trim();
+    if (q === "" || !Number.isFinite(Number(q)) || Number(q) < 0) out.add(`qty-${i}`);
+  });
+  return out;
+}
