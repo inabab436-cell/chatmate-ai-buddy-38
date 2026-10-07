@@ -478,7 +478,7 @@ export function CustomerChat({
                 onClick={() => setShowLogin(true)}
                 className="w-full rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground"
               >
-                تقدر تتكلم معانا مباشرة · سجّل دخولك لمتابعة طلباتك (اختياري)
+                تسجيل الدخول (اختياري)
               </button>
             )}
           </div>
