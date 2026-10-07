@@ -174,7 +174,6 @@ export function CustomerChat({
   const anonKey = config.data?.supabaseAnonKey ?? null;
 
   const session = useCustomerSession({ merchantId, visitorId, enabled: !ownerPreview });
-  const signedIn = ownerPreview || !!session.data?.loggedIn;
   // Guests can chat without signing in; their visitor id keeps the session.
   const loggedIn = true;
   const customerEmail = session.data?.email ?? null;
