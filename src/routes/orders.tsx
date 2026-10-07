@@ -129,7 +129,7 @@ async function exportOrdersToXlsx(orders: OrderRow[]) {
       address: o.customer_address ?? "",
       products: products.join("\n"),
       amount: Number.isFinite(value) ? value : 0,
-      notes: o.notes ?? "",
+      notes: (o.notes ?? "").split("— تفاصيل الأوردر —")[0].trim(),
     };
   });
 
