@@ -27,9 +27,9 @@ const FEATURES = [
   { icon: Link2, title: "متجر برابط خاص", text: "صفحة أنيقة لمتجرك تشاركها مع عملائك في أي مكان.", tone: "bg-dashboard-blue-soft text-dashboard-blue" },
   { icon: Package, title: "عرض منتجاتك", text: "الصور والأسعار والمقاسات والكميات في مكان واحد.", tone: "bg-dashboard-green-soft text-dashboard-green" },
   { icon: ShoppingBag, title: "استلام الطلبات", text: "تصلك الطلبات فورًا مع كل بيانات العميل.", tone: "bg-dashboard-rose-soft text-dashboard-rose" },
+  { icon: CreditCard, title: "الدفع بنفسك", text: "أنت من يستلم أمواله مباشرة — المنصة تعرض تفاصيل الدفع لعملائك ولا تستلم عنك ولا أي رسوم.", tone: "bg-dashboard-green-soft text-dashboard-green" },
   { icon: LayoutGrid, title: "إدارة الطلبات", text: "تابع حالة كل طلب من التجهيز حتى التسليم.", tone: "bg-dashboard-amber-soft text-dashboard-amber" },
   { icon: Truck, title: "الشحن", text: "حدّد المناطق وتكلفة التوصيل لكل منطقة.", tone: "bg-dashboard-blue-soft text-dashboard-blue" },
-  { icon: CreditCard, title: "طرق الدفع", text: "جهّز طرق دفعك الحالية لعملائك — بدون بوابة ولا رسوم.", tone: "bg-dashboard-green-soft text-dashboard-green" },
   { icon: BadgePercent, title: "العروض والخصومات", text: "أنشئ عروضًا تزيد مبيعاتك بسهولة.", tone: "bg-dashboard-rose-soft text-dashboard-rose" },
 ];
 
