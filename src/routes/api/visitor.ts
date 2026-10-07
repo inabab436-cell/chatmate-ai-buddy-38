@@ -12,7 +12,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getCookie, setCookie } from "@tanstack/react-start/server";
 
 const COOKIE_NAME = "cupai_vid";
-const ONE_YEAR = 60 * 60 * 24 * 365;
+// Browsers cap cookie lifetime at ~400 days; the cookie is refreshed on every visit.
+const ONE_YEAR = 60 * 60 * 24 * 400;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,7 +48,7 @@ export function resolveVisitorId(
   fallbackVisitorId?: string | null,
 ): { visitorId: string; setCookieHeader: string | null } {
   const fromRequest = cookieValueFromRequest(request);
-  if (fromRequest) return { visitorId: fromRequest, setCookieHeader: null };
+  if (fromRequest) return { visitorId: fromRequest, setCookieHeader: visitorCookieHeader(fromRequest) };
 
   let fromContext: string | null = null;
   try {

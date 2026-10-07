@@ -25,6 +25,7 @@ import { CustomerAuthGate, useCustomerSession } from "@/components/customer/cust
 import { getStorefront, createStorefrontOrder, checkStorefrontStock, quoteStorefrontCart, type StorefrontData, type StorefrontAppliedOffer } from "@/lib/storefront.functions";
 import { saveCustomerDraft, clearCustomerDraft } from "@/lib/customer-orders.functions";
 import { THEMES } from "@/components/website/identity-section";
+import { t, storeDir, useStoreLang, StoreLangToggle } from "@/lib/store-i18n";
 
 export const Route = createFileRoute("/c/$slug/")({
   head: ({ params }) => {
@@ -57,7 +58,8 @@ function BrandPageShell() {
 }
 
 function BrandPage({ slug }: { slug: string }) {
-  return <BrandPageInner slug={slug} />;
+  const lang = useStoreLang();
+  return <BrandPageInner key={lang} slug={slug} />;
 }
 
 /**
@@ -114,7 +116,7 @@ function BrandPageInner({ slug }: { slug: string }) {
 
   if (q.isLoading) {
     return (
-      <div dir="rtl" className="store grid min-h-screen place-items-center">
+      <div dir={storeDir()} className="store grid min-h-screen place-items-center">
         <span className="store-display animate-pulse text-5xl">{brandName}</span>
       </div>
     );
@@ -122,11 +124,11 @@ function BrandPageInner({ slug }: { slug: string }) {
   const store: StorefrontData | undefined = q.data;
   if (!store || !store.found) {
     return (
-      <div dir="rtl" className="store grid min-h-screen place-items-center px-6 text-center">
+      <div dir={storeDir()} className="store grid min-h-screen place-items-center px-6 text-center">
         <div>
           <p className="store-display text-[120px]">404</p>
-          <h1 className="store-label mt-2">المتجر غير موجود</h1>
-          <p className="mt-2 text-sm text-muted-foreground">لا يوجد متجر على الرابط /c/{slug}</p>
+          <h1 className="store-label mt-2">{t("المتجر غير موجود")}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{t("لا يوجد متجر على الرابط")} /c/{slug}</p>
         </div>
       </div>
     );
@@ -139,13 +141,13 @@ function BrandPageInner({ slug }: { slug: string }) {
   const onSale = store.products.some((p) => (p.offers ?? []).length > 0);
 
   return (
-    <div dir="rtl" className="store min-h-screen">
+    <div dir={storeDir()} className="store min-h-screen">
       {/* Announcement bar */}
       <div className="overflow-hidden bg-primary py-2 text-primary-foreground">
         <div className="store-marquee flex w-max gap-12 whitespace-nowrap">
           {Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="store-label">
-              {onSale ? "عروض لفترة محدودة · " : ""}شحن لكل المحافظات · الدفع بالطريقة التي تناسبك
+              {onSale ? t("عروض لفترة محدودة · ") : ""}{t("شحن لكل المحافظات · الدفع بالطريقة التي تناسبك")}
             </span>
           ))}
         </div>
@@ -153,7 +155,7 @@ function BrandPageInner({ slug }: { slug: string }) {
 
       <Link
         to="/chat/$slug" params={{ slug }} search={{ mode: "continue" }}
-        aria-label="تواصل معنا"
+        aria-label={t("تواصل معنا")}
         className="store-chat-fab"
       >
         <span className="store-chat-fab-ring" aria-hidden />
@@ -162,7 +164,7 @@ function BrandPageInner({ slug }: { slug: string }) {
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-8">
           <nav className="hidden items-center gap-6 sm:flex">
-            <button onClick={() => setCategory(null)} className="store-label hover:underline underline-offset-8">الكل</button>
+            <button onClick={() => setCategory(null)} className="store-label hover:underline underline-offset-8">{t("الكل")}</button>
             {categories.slice(0, 3).map((c) => (
               <button key={c} onClick={() => setCategory(c)} className="store-label hover:underline underline-offset-8">{c}</button>
             ))}
@@ -173,15 +175,16 @@ function BrandPageInner({ slug }: { slug: string }) {
             <span className="store-display truncate text-3xl sm:text-4xl">{brandName}</span>
           </Link>
           <div className="flex items-center justify-end gap-1">
+            <StoreLangToggle />
             <Link
               to="/c/$slug/track" params={{ slug }}
               className="store-label inline-flex h-10 items-center border-b border-foreground/30 pb-0.5 transition hover:border-foreground"
             >
-              تتبع طلبي
+              {t("تتبع طلبي")}
             </Link>
             <button
               onClick={() => { void q.refetch(); setCartOpen(true); }}
-              aria-label="السلة"
+              aria-label={t("السلة")}
               className="relative grid h-10 w-10 place-items-center hover:bg-muted"
             >
               <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
@@ -203,7 +206,7 @@ function BrandPageInner({ slug }: { slug: string }) {
           )}
           {heroImg && <div className="absolute inset-0 -z-10 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" />}
           <div className={heroImg ? "text-primary-foreground" : ""}>
-            <p className="store-label">المجموعة الجديدة</p>
+            <p className="store-label">{t("المجموعة الجديدة")}</p>
             <h2 className="store-display mt-3 max-w-4xl text-7xl sm:text-9xl">{brandName}</h2>
             {store.brandDescription && (
               <p className="mt-4 max-w-xl text-base opacity-90">{store.brandDescription}</p>
@@ -212,7 +215,7 @@ function BrandPageInner({ slug }: { slug: string }) {
               href="#shop"
               className={`store-label mt-8 inline-flex h-12 items-center px-10 transition ${heroImg ? "bg-background text-foreground hover:bg-background/85" : "bg-primary text-primary-foreground hover:bg-primary/85"}`}
             >
-              تسوّق الآن
+              {t("تسوّق الآن")}
             </a>
           </div>
         </div>
@@ -220,8 +223,8 @@ function BrandPageInner({ slug }: { slug: string }) {
 
       <main id="shop" className="mx-auto w-full max-w-7xl scroll-mt-20 px-4 py-14 sm:px-8">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
-          <h2 className="store-display text-5xl sm:text-6xl">{category ?? "كل المنتجات"}</h2>
-          <span className="store-label text-muted-foreground">{shown.length} قطعة</span>
+          <h2 className="store-display text-5xl sm:text-6xl">{category ?? t("كل المنتجات")}</h2>
+          <span className="store-label text-muted-foreground">{shown.length} {t("قطعة")}</span>
         </div>
         {categories.length > 0 && (
           <div className="-mx-4 mb-8 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
@@ -231,15 +234,15 @@ function BrandPageInner({ slug }: { slug: string }) {
                 onClick={() => setCategory(c)}
                 className={`store-label shrink-0 border px-4 py-2 transition ${category === c ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}
               >
-                {c ?? "الكل"}
+                {c ?? t("الكل")}
               </button>
             ))}
           </div>
         )}
         {shown.length === 0 ? (
           <div className="border border-dashed border-border py-24 text-center">
-            <p className="store-display text-4xl">قريباً</p>
-            <p className="mt-2 text-sm text-muted-foreground">لا توجد منتجات منشورة بعد.</p>
+            <p className="store-display text-4xl">{t("قريباً")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("لا توجد منتجات منشورة بعد.")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 lg:grid-cols-4">
@@ -254,9 +257,9 @@ function BrandPageInner({ slug }: { slug: string }) {
       <section className="border-y border-border">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:divide-x-reverse">
           {[
-            { Icon: Truck, t: "شحن سريع", d: "لكل المحافظات" },
-            { Icon: ShieldCheck, t: "دفع آمن", d: "بالطريقة التي تناسبك" },
-            { Icon: MessageSquare, t: "خدمة العملاء", d: "نرد عليك في أسرع وقت" },
+            { Icon: Truck, t: t("شحن سريع"), d: t("لكل المحافظات") },
+            { Icon: ShieldCheck, t: t("دفع آمن"), d: t("بالطريقة التي تناسبك") },
+            { Icon: MessageSquare, t: t("خدمة العملاء"), d: t("نرد عليك في أسرع وقت") },
           ].map(({ Icon, t, d }) => (
             <div key={t} className="flex items-center gap-4 px-6 py-6">
               <Icon className="h-6 w-6 shrink-0" strokeWidth={1.25} />
@@ -282,8 +285,8 @@ function BrandPageInner({ slug }: { slug: string }) {
             <p className="store-display text-5xl">{brandName}</p>
             {store.brandDescription && <p className="mt-3 max-w-xs text-sm opacity-70">{store.brandDescription}</p>}
           </div>
-          <FooterList kind="shipping" title="الشحن" items={store.shipping.map((s) => ({ id: s.id, label: [s.country, s.region].filter(Boolean).join(" / ") || "الشحن" }))} onOpen={(id) => setOpenDetail({ kind: "shipping", id })} />
-          <FooterList kind="contact" title="تواصل معنا" items={store.contacts.map((c) => ({ id: c.id, label: c.label || c.value }))} onOpen={(id) => setOpenDetail({ kind: "contact", id })} />
+          <FooterList kind="shipping" title={t("الشحن")} items={store.shipping.map((s) => ({ id: s.id, label: [s.country, s.region].filter(Boolean).join(" / ") || t("الشحن") }))} onOpen={(id) => setOpenDetail({ kind: "shipping", id })} />
+          <FooterList kind="contact" title={t("تواصل معنا")} items={store.contacts.map((c) => ({ id: c.id, label: c.label || c.value }))} onOpen={(id) => setOpenDetail({ kind: "contact", id })} />
         </div>
         <div className="border-t border-primary-foreground/15 py-5 text-center">
           <span className="store-label opacity-60">© {new Date().getFullYear()} {brandName}</span>
@@ -360,42 +363,42 @@ function ProductOfferBox({
       </div>
       {plan.qualifies && plan.discountNow > 0 && (
         <div className="text-foreground">
-          وفّرت {plan.discountNow} {currency} على {quantity} {quantity === 1 ? "قطعة" : "قطع"} — الإجمالي {plan.totalNow} {currency}
+          {t("وفّرت")} {plan.discountNow} {currency} {t("على")} {quantity} {quantity === 1 ? t("قطعة") : t("قطع")} — {t("الإجمالي")} {plan.totalNow} {currency}
         </div>
       )}
       {nearMiss && (
         <div className="flex flex-wrap items-center gap-2">
           <span>
-            اشترِ {plan.unitsNeeded} {plan.unitsNeeded === 1 ? "قطعة" : "قطع"} ({plan.subtotalAtUnits} {currency}) وتوفّر {plan.discountAtUnits} {currency} — الإجمالي {plan.totalAtUnits} {currency}
+            {t("اشترِ")} {plan.unitsNeeded} {plan.unitsNeeded === 1 ? t("قطعة") : t("قطع")} ({plan.subtotalAtUnits} {currency}) {t("وتوفّر")} {plan.discountAtUnits} {currency} — {t("الإجمالي")} {plan.totalAtUnits} {currency}
           </span>
           <button
             type="button"
             onClick={() => onPickQty(plan.unitsNeeded)}
             className="rounded-full bg-destructive px-2 py-0.5 font-semibold text-destructive-foreground"
           >
-            اجعلها {plan.unitsNeeded}
+            {t("اجعلها")} {plan.unitsNeeded}
           </button>
         </div>
       )}
       {show("countdown") && o.ends_at && (
         <div className="flex justify-between gap-2 text-muted-foreground">
-          <span>ينتهي خلال</span><OfferCountdown endsAt={o.ends_at} />
+          <span>{t("ينتهي خلال")}</span><OfferCountdown endsAt={o.ends_at} />
         </div>
       )}
       {show("remaining") && o.remaining != null && (
         <div className="flex justify-between gap-2 text-muted-foreground">
-          <span>المتبقي من العرض</span><span>{o.remaining}</span>
+          <span>{t("المتبقي من العرض")}</span><span>{o.remaining}</span>
         </div>
       )}
       {show("usage_type") && (
         <div className="flex justify-between gap-2 text-muted-foreground">
-          <span>نوع الاستخدام</span>
-          <span>{o.usage_limit_type === "once_per_customer" ? "مرة واحدة لكل عميل" : "على كل أوردر"}</span>
+          <span>{t("نوع الاستخدام")}</span>
+          <span>{o.usage_limit_type === "once_per_customer" ? t("مرة واحدة لكل عميل") : t("على كل أوردر")}</span>
         </div>
       )}
       {show("min_order_total") && o.min_order_total != null && (
         <div className="flex justify-between gap-2 text-muted-foreground">
-          <span>الحد الأدنى للطلب</span><span>{o.min_order_total} {currency}</span>
+          <span>{t("الحد الأدنى للطلب")}</span><span>{o.min_order_total} {currency}</span>
         </div>
       )}
     </div>
@@ -466,7 +469,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
   const cur = product.currency ?? "";
   const showLow = selectedStock != null && selectedStock > 0 && selectedStock <= LOW_STOCK_THRESHOLD;
   const addToCart = () => {
-    if (alreadyInCart) { toast.info("تمت الإضافة بالفعل"); return; }
+    if (alreadyInCart) { toast.info(t("تمت الإضافة بالفعل")); return; }
     cart.add({
       productId: product.id, name: product.name,
       price: unitPrice, currency: product.currency, image: img ?? null,
@@ -496,12 +499,12 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
             <span className="store-label bg-destructive px-2 py-1 text-destructive-foreground">{plan.badge}</span>
           )}
           {showLow && (
-            <span className="store-label bg-background px-2 py-1 text-foreground">آخر {selectedStock} قطع</span>
+            <span className="store-label bg-background px-2 py-1 text-foreground">{t("آخر")} {selectedStock} {t("قطع")}</span>
           )}
         </div>
         {outOfStock && (
           <div className="absolute inset-0 grid place-items-center bg-background/60">
-            <span className="store-label bg-background px-3 py-1.5">نفدت الكمية</span>
+            <span className="store-label bg-background px-3 py-1.5">{t("نفدت الكمية")}</span>
           </div>
         )}
       </div>
@@ -545,7 +548,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
         )}
         {selectedStock != null && showLow && (
           <div className="flex items-center gap-1 text-[11px] font-semibold text-destructive">
-            <Flame className="h-3 w-3" /> متبقي {selectedStock} {selectedStock === 1 ? "قطعة" : "قطع"} فقط
+            <Flame className="h-3 w-3" /> {t("متبقي")} {selectedStock} {selectedStock === 1 ? t("قطعة") : t("قطع")} {t("فقط")}
           </div>
         )}
 
@@ -557,17 +560,17 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
               onClick={addToCart}
               className="store-label h-10 w-full bg-primary text-primary-foreground transition hover:bg-primary/85 disabled:bg-muted disabled:text-muted-foreground"
             >
-              {alreadyInCart ? "في السلة ✓" : "شراء الآن"}
+              {alreadyInCart ? t("في السلة ✓") : t("شراء الآن")}
             </button>
           </div>
         )}
       </div>
       {open && (
-        <div className="store fixed inset-0 z-50 flex bg-foreground/40 backdrop-blur-sm" dir="rtl" onClick={() => setOpen(false)}>
+        <div className="store fixed inset-0 z-50 flex bg-foreground/40 backdrop-blur-sm" dir={storeDir()} onClick={() => setOpen(false)}>
           <div className="mr-auto flex h-full w-full max-w-lg flex-col overflow-y-auto bg-background shadow-2xl animate-in slide-in-from-left duration-300" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b px-5 py-4">
-              <span className="store-label">تفاصيل المنتج</span>
-              <button onClick={() => setOpen(false)} aria-label="إغلاق" className="rounded p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
+              <span className="store-label">{t("تفاصيل المنتج")}</span>
+              <button onClick={() => setOpen(false)} aria-label={t("إغلاق")} className="rounded p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
             </div>
             <div className="relative mx-auto aspect-square max-h-[55vh] w-full bg-secondary">
               {shownImg ? <img src={shownImg} alt={product.name} className="absolute inset-0 h-full w-full object-contain" /> : (
@@ -597,7 +600,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
               {product.description && <p className="whitespace-pre-line text-sm leading-7 text-muted-foreground"><LinkifyText text={product.description} /></p>}
               {availableColors.length > 0 && (
                 <div>
-                  <p className="store-label mb-2">اللون: <span className="text-muted-foreground">{color}</span></p>
+                  <p className="store-label mb-2">{t("اللون:")} <span className="text-muted-foreground">{color}</span></p>
                   <div className="flex flex-wrap gap-2">
                     {availableColors.map((c) => (
                       <ColorSwatch key={c} label={c} image={product.colorImages?.[c]?.[0] ?? null} active={color === c} onClick={() => pickColor(c)} />
@@ -607,7 +610,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
               )}
               {sizesForColor.length > 0 && (
                 <div>
-                  <p className="store-label mb-2">المقاس</p>
+                  <p className="store-label mb-2">{t("المقاس")}</p>
                   <div className="flex flex-wrap gap-2">
                     {sizesForColor.map((s) => (
                       <button key={s} type="button" onClick={() => { setSize(s); setQty(1); }}
@@ -618,17 +621,17 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
               )}
               {plan && <ProductOfferBox plan={plan} currency={cur} quantity={clampedQty} onPickQty={(n) => setQty(n)} />}
               {outOfStock ? (
-                <span className="store-label bg-muted px-3 py-3 text-center">نفدت الكمية</span>
+                <span className="store-label bg-muted px-3 py-3 text-center">{t("نفدت الكمية")}</span>
               ) : (
                 <div className="flex items-stretch gap-2">
                   <div className="flex h-12 items-center border border-border">
-                    <button type="button" aria-label="زيادة" className="h-full w-10 hover:bg-muted" onClick={() => setQty(Math.min(clampedQty + 1, maxQty))}>+</button>
+                    <button type="button" aria-label={t("زيادة")} className="h-full w-10 hover:bg-muted" onClick={() => setQty(Math.min(clampedQty + 1, maxQty))}>+</button>
                     <span className="w-8 text-center">{clampedQty}</span>
-                    <button type="button" aria-label="نقص" className="h-full w-10 hover:bg-muted" onClick={() => setQty(Math.max(clampedQty - 1, 1))}>−</button>
+                    <button type="button" aria-label={t("نقص")} className="h-full w-10 hover:bg-muted" onClick={() => setQty(Math.max(clampedQty - 1, 1))}>−</button>
                   </div>
                   <button type="button" disabled={alreadyInCart} onClick={addToCart}
                     className="store-label h-12 flex-1 bg-primary text-primary-foreground transition hover:bg-primary/85 disabled:bg-muted disabled:text-muted-foreground">
-                    {alreadyInCart ? "في السلة ✓" : "شراء الآن"}
+                    {alreadyInCart ? t("في السلة ✓") : t("شراء الآن")}
                   </button>
                 </div>
               )}
@@ -659,10 +662,10 @@ function ColorSwatch({ label, image, active, onClick, small }: { label: string; 
 
 function showAddedToast(name: string, image: string | null) {
   toast.custom(() => (
-    <div dir="rtl" className="store flex w-[340px] items-center gap-3 border border-border bg-background p-3 text-foreground shadow-2xl">
+    <div dir={storeDir()} className="store flex w-[340px] items-center gap-3 border border-border bg-background p-3 text-foreground shadow-2xl">
       {image ? <img src={image} alt="" className="h-14 w-11 shrink-0 object-cover" /> : <ShoppingBag className="h-6 w-6 shrink-0" strokeWidth={1.5} />}
       <div className="min-w-0 flex-1">
-        <p className="store-label">تمت الإضافة للسلة ✓</p>
+        <p className="store-label">{t("تمت الإضافة للسلة ✓")}</p>
         <p className="truncate text-xs text-muted-foreground">{name}</p>
       </div>
     </div>
@@ -758,7 +761,7 @@ function OfferCountdown({ endsAt }: { endsAt: string }) {
     return () => clearInterval(t);
   }, []);
   const ms = Date.parse(endsAt) - now;
-  if (!Number.isFinite(ms) || ms <= 0) return <span>انتهى العرض</span>;
+  if (!Number.isFinite(ms) || ms <= 0) return <span>{t("انتهى العرض")}</span>;
   const s = Math.floor(ms / 1000);
   const d = Math.floor(s / 86400);
   const h = Math.floor((s % 86400) / 3600);
@@ -767,7 +770,7 @@ function OfferCountdown({ endsAt }: { endsAt: string }) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return (
     <span className="font-mono">
-      {d > 0 ? `${d} يوم · ` : ""}{pad(h)}:{pad(m)}:{pad(sec)}
+      {d > 0 ? `${d} ${t("يوم")} · ` : ""}{pad(h)}:{pad(m)}:{pad(sec)}
     </span>
   );
 }
@@ -786,28 +789,28 @@ function AppliedOffers({ offers, currency }: { offers: StorefrontAppliedOffer[];
         return (
           <div key={o.offer_id} className="space-y-1">
             <div className="flex justify-between gap-2 font-medium">
-              <span>{show("title") ? o.title || "عرض" : "خصم مطبّق"}</span>
+              <span>{show("title") ? o.title || t("عرض") : t("خصم مطبّق")}</span>
               <span>-{o.discount_amount.toFixed(2)} {currency ?? ""}</span>
             </div>
             {show("countdown") && o.ends_at && (
               <div className="flex justify-between gap-2 text-muted-foreground">
-                <span>ينتهي خلال</span><OfferCountdown endsAt={o.ends_at} />
+                <span>{t("ينتهي خلال")}</span><OfferCountdown endsAt={o.ends_at} />
               </div>
             )}
             {show("remaining") && o.remaining != null && (
               <div className="flex justify-between gap-2 text-muted-foreground">
-                <span>المتبقي من العرض</span><span>{o.remaining}</span>
+                <span>{t("المتبقي من العرض")}</span><span>{o.remaining}</span>
               </div>
             )}
             {show("usage_type") && (
               <div className="flex justify-between gap-2 text-muted-foreground">
-                <span>نوع الاستخدام</span>
-                <span>{o.usage_limit_type === "once_per_customer" ? "مرة واحدة لكل عميل" : "على كل أوردر"}</span>
+                <span>{t("نوع الاستخدام")}</span>
+                <span>{o.usage_limit_type === "once_per_customer" ? t("مرة واحدة لكل عميل") : t("على كل أوردر")}</span>
               </div>
             )}
             {show("min_order_total") && o.min_order_total != null && (
               <div className="flex justify-between gap-2 text-muted-foreground">
-                <span>الحد الأدنى للطلب</span><span>{o.min_order_total} {currency ?? ""}</span>
+                <span>{t("الحد الأدنى للطلب")}</span><span>{o.min_order_total} {currency ?? ""}</span>
               </div>
             )}
           </div>
@@ -903,12 +906,12 @@ function CartDrawer({
     onSuccess: (res) => {
       if (res.ok === false) {
         if (res.error === "login_required") {
-          toast.error("لازم تسجّل الدخول بالإيميل الأول عشان نقدر ننشئ الأوردر.");
+          toast.error(t("لازم تسجّل الدخول بالإيميل الأول عشان نقدر ننشئ الأوردر."));
           return;
         }
         // Server rejected on the LATEST stock — nothing was saved.
         setShortages(res.shortages ?? []);
-        toast.error("الكمية المطلوبة غير متاحة حالياً.");
+        toast.error(t("الكمية المطلوبة غير متاحة حالياً."));
         return;
       }
 
@@ -927,7 +930,7 @@ function CartDrawer({
           quantity: l.quantity, price: l.price, currency: l.currency,
         })),
         shippingLabel: shippingRow
-          ? [shippingRow.country, shippingRow.region].filter(Boolean).join(" / ") || "الشحن"
+          ? [shippingRow.country, shippingRow.region].filter(Boolean).join(" / ") || t("الشحن")
           : null,
         shippingPrice,
         subtotal: res.subtotal,
@@ -939,7 +942,7 @@ function CartDrawer({
       setStep("done");
     },
     onError: () => {
-      toast.error("تعذّر إنشاء الأوردر. الرجاء المحاولة مرة أخرى.");
+      toast.error(t("تعذّر إنشاء الأوردر. الرجاء المحاولة مرة أخرى."));
     },
   });
 
@@ -963,7 +966,7 @@ function CartDrawer({
     onSuccess: (res) => {
       if (res.ok === false) {
         setShortages(res.shortages ?? []);
-        toast.error("الكمية المطلوبة أكبر من المتاح في المخزون.");
+        toast.error(t("الكمية المطلوبة أكبر من المتاح في المخزون."));
         return;
       }
       setShortages([]);
@@ -977,15 +980,15 @@ function CartDrawer({
   const nameCheck = validateCustomerName(name);
   const phoneCheck = validateEgyptianPhone(phone);
   const addressCheck = validateAddress(address);
-  const nameError = !name.trim() || nameCheck.ok ? null : "اكتب الاسم ثنائي على الأقل (الاسم واسم الأب) بدون أرقام أو رموز.";
+  const nameError = !name.trim() || nameCheck.ok ? null : t("اكتب الاسم ثنائي على الأقل (الاسم واسم الأب) بدون أرقام أو رموز.");
   const phoneError = !phone.trim() || phoneCheck.ok ? null
-    : phoneCheck.reason === "too_short" ? "الرقم ناقص: رقم الموبايل المصري 11 رقم."
-    : phoneCheck.reason === "too_long" ? "الرقم طويل: رقم الموبايل المصري 11 رقم."
-    : "رقم غير صحيح: لازم يبدأ بـ 010 أو 011 أو 012 أو 015 ويكون 11 رقم.";
+    : phoneCheck.reason === "too_short" ? t("الرقم ناقص: رقم الموبايل المصري 11 رقم.")
+    : phoneCheck.reason === "too_long" ? t("الرقم طويل: رقم الموبايل المصري 11 رقم.")
+    : t("رقم غير صحيح: لازم يبدأ بـ 010 أو 011 أو 012 أو 015 ويكون 11 رقم.");
   const addressError = !address.trim() || addressCheck.ok ? null
     : addressCheck.missing.includes("governorate")
-      ? "العنوان ناقص: اكتب المحافظة والمنطقة والشارع."
-      : "العنوان ناقص: اكتب المنطقة والشارع أو علامة مميزة.";
+      ? t("العنوان ناقص: اكتب المحافظة والمنطقة والشارع.")
+      : t("العنوان ناقص: اكتب المنطقة والشارع أو علامة مميزة.");
 
   const canSubmit = Boolean(
     nameCheck.ok && phoneCheck.ok && addressCheck.ok &&
@@ -997,17 +1000,17 @@ function CartDrawer({
 
 
   return (
-    <div className="store fixed inset-0 z-50 flex" onClick={onClose} dir="rtl">
+    <div className="store fixed inset-0 z-50 flex" onClick={onClose} dir={storeDir()}>
       <div className="flex-1 bg-foreground/50 backdrop-blur-[2px]" />
       <div className="flex h-full w-full max-w-md flex-col bg-background shadow-2xl animate-in slide-in-from-left duration-300" onClick={(e) => e.stopPropagation()}>
         <div className="border-b p-4">
           <div className="flex items-center justify-between">
             <h3 className="store-display text-xl">
-              {step === "cart" && "سلة الشراء"}
-              {step === "shipping" && "منطقة الشحن"}
-              {step === "payment" && "طريقة الدفع"}
-              {step === "summary" && "ملخص الأوردر"}
-              {step === "done" && (receipt?.requiresPayment ? "بانتظار إتمام الدفع" : "تم تأكيد الأوردر")}
+              {step === "cart" && t("سلة الشراء")}
+              {step === "shipping" && t("منطقة الشحن")}
+              {step === "payment" && t("طريقة الدفع")}
+              {step === "summary" && t("ملخص الأوردر")}
+              {step === "done" && (receipt?.requiresPayment ? t("بانتظار إتمام الدفع") : t("تم تأكيد الأوردر"))}
             </h3>
             <button onClick={onClose} className="rounded p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
           </div>
@@ -1018,7 +1021,7 @@ function CartDrawer({
                   <div className="flex flex-col items-center gap-1">
                     <div className={`h-1.5 w-1.5 rounded-full ${i <= ["cart", "shipping", "payment", "summary"].indexOf(step) ? "bg-primary" : "bg-border"}`} />
                     <span className={`text-[10px] ${i <= ["cart", "shipping", "payment", "summary"].indexOf(step) ? "text-foreground" : "text-muted-foreground"}`}>
-                      {s === "cart" ? "السلة" : s === "shipping" ? "الشحن" : s === "payment" ? "الدفع" : "الملخص"}
+                      {s === "cart" ? t("السلة") : s === "shipping" ? t("الشحن") : s === "payment" ? t("الدفع") : t("الملخص")}
                     </span>
                   </div>
                   {i < 3 && <div className="mb-3 h-px flex-1 bg-border" />}
@@ -1033,29 +1036,29 @@ function CartDrawer({
             <div className="space-y-3 text-sm">
               <div className="bg-primary p-4 text-primary-foreground">
                 <div className="store-display text-xl">
-                  {receipt.requiresPayment ? "تم تسجيل الأوردر — فاضل إتمام الدفع" : "تم إنشاء الأوردر بنجاح ✅"}
+                  {receipt.requiresPayment ? t("تم تسجيل الأوردر — فاضل إتمام الدفع") : t("تم إنشاء الأوردر بنجاح ✅")}
                 </div>
-                <div className="mt-1 text-sm">رقم الأوردر: <span className="font-mono">{receipt.orderNumber}</span></div>
-                <div className="mt-1 text-sm">الإجمالي: {receipt.total} {receipt.currency ?? ""}</div>
+                <div className="mt-1 text-sm">{t("رقم الأوردر:")} <span className="font-mono">{receipt.orderNumber}</span></div>
+                <div className="mt-1 text-sm">{t("الإجمالي")}: {receipt.total} {receipt.currency ?? ""}</div>
               </div>
 
               {receipt.requiresPayment ? (
                 <>
                   <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
-                    لن يُعتبر الأوردر مدفوعاً قبل تأكيد الدفع
-                    {receipt.paymentMethod ? ` عبر ${receipt.paymentMethod}` : ""}.
+                    {t("لن يُعتبر الأوردر مدفوعاً قبل تأكيد الدفع")}
+                    {receipt.paymentMethod ? ` ${t("عبر")} ${receipt.paymentMethod}` : ""}.
                   </p>
                   {(receipt.amountDue != null || receipt.paymentDetails) && (
                     <div className="space-y-2 rounded-lg border p-3">
                       {receipt.amountDue != null && (
                         <div className="flex justify-between font-semibold">
-                          <span>المبلغ المطلوب الآن</span>
+                          <span>{t("المبلغ المطلوب الآن")}</span>
                           <span>{receipt.amountDue.toFixed(2)} {receipt.currency ?? ""}</span>
                         </div>
                       )}
                       {receipt.paymentDetails && (
                         <div>
-                          <div className="text-xs text-muted-foreground">بيانات الدفع</div>
+                          <div className="text-xs text-muted-foreground">{t("بيانات الدفع")}</div>
                           <p className="mt-1 whitespace-pre-wrap break-words font-medium" dir="auto">
                             <LinkifyText text={receipt.paymentDetails} />
                           </p>
@@ -1067,10 +1070,10 @@ function CartDrawer({
                     href={`/chat/${slug}`}
                     className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary font-semibold text-primary-foreground"
                   >
-                    <MessageSquare className="h-4 w-4" /> التوجه لإتمام الدفع
+                    <MessageSquare className="h-4 w-4" /> {t("التوجه لإتمام الدفع")}
                   </a>
                   <Button variant="outline" className="w-full" onClick={() => setShowDetails((v) => !v)}>
-                    {showDetails ? "إخفاء تفاصيل الأوردر" : "الرجوع لرؤية تفاصيل الأوردر"}
+                    {showDetails ? t("إخفاء تفاصيل الأوردر") : t("الرجوع لرؤية تفاصيل الأوردر")}
                   </Button>
                 </>
               ) : (
@@ -1096,26 +1099,26 @@ function CartDrawer({
                   </ul>
                   {receipt.discount > 0 && (
                     <>
-                      <div className="flex justify-between border-t pt-1"><span className="text-muted-foreground">السعر قبل الخصم</span><span>{receipt.subtotal.toFixed(2)} {receipt.currency ?? ""}</span></div>
+                      <div className="flex justify-between border-t pt-1"><span className="text-muted-foreground">{t("السعر قبل الخصم")}</span><span>{receipt.subtotal.toFixed(2)} {receipt.currency ?? ""}</span></div>
                       <div className="flex justify-between text-primary">
-                        <span>قيمة الخصم</span><span>-{receipt.discount.toFixed(2)} {receipt.currency ?? ""}</span>
+                        <span>{t("قيمة الخصم")}</span><span>-{receipt.discount.toFixed(2)} {receipt.currency ?? ""}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">السعر بعد الخصم</span>
+                        <span className="text-muted-foreground">{t("السعر بعد الخصم")}</span>
                         <span>{(receipt.subtotal - receipt.discount).toFixed(2)} {receipt.currency ?? ""}</span>
                       </div>
                       <AppliedOffers offers={receipt.offers} currency={receipt.currency} />
                     </>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">الشحن {receipt.shippingLabel ? `(${receipt.shippingLabel})` : ""}</span>
+                    <span className="text-muted-foreground">{t("الشحن")} {receipt.shippingLabel ? `(${receipt.shippingLabel})` : ""}</span>
                     <span>{receipt.shippingPrice.toFixed(2)} {receipt.currency ?? ""}</span>
                   </div>
                   {receipt.paymentMethod && (
-                    <div className="flex justify-between"><span className="text-muted-foreground">طريقة الدفع</span><span>{receipt.paymentMethod}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">{t("طريقة الدفع")}</span><span>{receipt.paymentMethod}</span></div>
                   )}
                   <div className="flex justify-between border-t pt-1 font-semibold">
-                    <span>الإجمالي النهائي</span><span>{receipt.total.toFixed(2)} {receipt.currency ?? ""}</span>
+                    <span>{t("الإجمالي النهائي")}</span><span>{receipt.total.toFixed(2)} {receipt.currency ?? ""}</span>
                   </div>
                 </div>
               )}
@@ -1125,7 +1128,7 @@ function CartDrawer({
 
           {step === "cart" && (
             cart.lines.length === 0 ? (
-              <div className="py-16 text-center"><ShoppingBag className="mx-auto h-10 w-10" strokeWidth={1} /><p className="store-display mt-4 text-xl">سلتك فارغة</p><p className="mt-1 text-sm text-muted-foreground">لم تُضِف أي منتجات بعد.</p></div>
+              <div className="py-16 text-center"><ShoppingBag className="mx-auto h-10 w-10" strokeWidth={1} /><p className="store-display mt-4 text-xl">{t("سلتك فارغة")}</p><p className="mt-1 text-sm text-muted-foreground">{t("لم تُضِف أي منتجات بعد.")}</p></div>
             ) : (
               <ul className="space-y-3">
                 {cart.lines.map((l) => (
@@ -1157,7 +1160,7 @@ function CartDrawer({
           {step === "shipping" && (
             <div className="space-y-3 text-sm">
               {store.shipping.length === 0 ? (
-                <p className="text-muted-foreground">لا توجد مناطق شحن محددة — سيتم التواصل معك لتحديد الشحن.</p>
+                <p className="text-muted-foreground">{t("لا توجد مناطق شحن محددة — سيتم التواصل معك لتحديد الشحن.")}</p>
               ) : (
                 <ul className="space-y-2">
                   {store.shipping.map((s) => (
@@ -1165,9 +1168,9 @@ function CartDrawer({
                       <label className={`flex cursor-pointer items-start gap-3 border p-3 transition ${shippingId === s.id ? "border-primary bg-secondary" : "border-border hover:border-foreground/40"}`}>
                         <input type="radio" name="shipping" checked={shippingId === s.id} onChange={() => setShippingId(s.id)} className="mt-1" />
                         <span className="flex-1">
-                          <span className="font-medium">{[s.country, s.region].filter(Boolean).join(" / ") || "الشحن"}</span>
+                          <span className="font-medium">{[s.country, s.region].filter(Boolean).join(" / ") || t("الشحن")}</span>
                           <span className="block text-xs text-muted-foreground">
-                            {s.price != null ? `${s.price} ${s.currency ?? ""}` : "سعر الشحن غير محدد"}
+                            {s.price != null ? `${s.price} ${s.currency ?? ""}` : t("سعر الشحن غير محدد")}
                             {s.eta ? ` · ${s.eta}` : ""}
                           </span>
                         </span>
@@ -1182,7 +1185,7 @@ function CartDrawer({
           {step === "payment" && (
             <div className="space-y-3 text-sm">
               {store.paymentMethods.length === 0 ? (
-                <p className="text-muted-foreground">لا توجد طرق دفع مفعّلة — سيتم التواصل معك للاتفاق على الدفع.</p>
+                <p className="text-muted-foreground">{t("لا توجد طرق دفع مفعّلة — سيتم التواصل معك للاتفاق على الدفع.")}</p>
               ) : (
                 <ul className="space-y-2">
                   {store.paymentMethods.map((m) => (
@@ -1216,25 +1219,25 @@ function CartDrawer({
                 <div className="space-y-1 border p-3">
                   {discount > 0 && (
                     <>
-                      <div className="flex justify-between"><span className="text-muted-foreground">السعر قبل الخصم</span><span>{subtotal.toFixed(2)} {currency ?? ""}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">{t("السعر قبل الخصم")}</span><span>{subtotal.toFixed(2)} {currency ?? ""}</span></div>
                       <div className="flex justify-between">
-                        <span>قيمة الخصم</span><span>-{discount.toFixed(2)} {currency ?? ""}</span>
+                        <span>{t("قيمة الخصم")}</span><span>-{discount.toFixed(2)} {currency ?? ""}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">السعر بعد الخصم</span>
+                        <span className="text-muted-foreground">{t("السعر بعد الخصم")}</span>
                         <span>{(subtotal - discount).toFixed(2)} {currency ?? ""}</span>
                       </div>
                     </>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">الشحن {shippingRow ? `(${[shippingRow.country, shippingRow.region].filter(Boolean).join(" / ")})` : ""}</span>
+                    <span className="text-muted-foreground">{t("الشحن")} {shippingRow ? `(${[shippingRow.country, shippingRow.region].filter(Boolean).join(" / ")})` : ""}</span>
                     <span>{shippingPrice.toFixed(2)} {currency ?? ""}</span>
                   </div>
                   <div className="flex justify-between border-t pt-2 font-semibold">
-                    <span>الإجمالي النهائي</span><span>{total.toFixed(2)} {currency ?? ""}</span>
+                    <span>{t("الإجمالي النهائي")}</span><span>{total.toFixed(2)} {currency ?? ""}</span>
                   </div>
                   {paymentName && (
-                    <div className="flex justify-between pt-1"><span className="text-muted-foreground">طريقة الدفع</span><span>{paymentName}</span></div>
+                    <div className="flex justify-between pt-1"><span className="text-muted-foreground">{t("طريقة الدفع")}</span><span>{paymentName}</span></div>
                   )}
                 </div>
 
@@ -1244,37 +1247,37 @@ function CartDrawer({
                 <CustomerAuthGate merchantId={merchantId} brandName={brandName} themePrimary="#111111">
                   <div className="space-y-2">
                     <div>
-                      <Label className="text-xs">الاسم *</Label>
-                      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="الاسم ثنائي أو ثلاثي" />
+                      <Label className="text-xs">{t("الاسم *")}</Label>
+                      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("الاسم ثنائي أو ثلاثي")} />
                       {nameError && <p className="mt-1 text-[11px] text-destructive">{nameError}</p>}
                     </div>
                     <div>
-                      <Label className="text-xs">رقم الهاتف *</Label>
+                      <Label className="text-xs">{t("رقم الهاتف *")}</Label>
                       <Input value={phone} inputMode="tel" dir="ltr" onChange={(e) => setPhone(e.target.value)} placeholder="01XXXXXXXXX" />
                       {phoneError && <p className="mt-1 text-[11px] text-destructive">{phoneError}</p>}
                     </div>
                     <div>
-                      <Label className="text-xs">العنوان *</Label>
-                      <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="المحافظة - المنطقة - الشارع" />
+                      <Label className="text-xs">{t("العنوان *")}</Label>
+                      <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={t("المحافظة - المنطقة - الشارع")} />
                       {addressError && <p className="mt-1 text-[11px] text-destructive">{addressError}</p>}
                     </div>
 
-                    <div><Label className="text-xs">ملاحظات</Label><Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
+                    <div><Label className="text-xs">{t("ملاحظات")}</Label><Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
                   </div>
                   {shortages.length > 0 && (
                     <div className="mt-3 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
-                      <div className="font-medium">الكميات التالية غير متاحة حالياً، ولم يتم حفظ الأوردر:</div>
+                      <div className="font-medium">{t("الكميات التالية غير متاحة حالياً، ولم يتم حفظ الأوردر:")}</div>
                       <ul className="mt-1 space-y-0.5">
                         {shortages.map((s, i) => (
                           <li key={i}>
-                            {[s.product_name, s.color, s.size].filter(Boolean).join(" · ")} — المطلوب {s.requested} / المتاح {s.available}
+                            {[s.product_name, s.color, s.size].filter(Boolean).join(" · ")} — {t("المطلوب")} {s.requested} / {t("المتاح")} {s.available}
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
                   <Button className="mt-3 w-full" disabled={mut.isPending || !canSubmit} onClick={() => mut.mutate()}>
-                    <Send className="ml-1 h-4 w-4" /> {mut.isPending ? "جارٍ إنشاء الأوردر…" : "تأكيد الأوردر"}
+                    <Send className="ml-1 h-4 w-4" /> {mut.isPending ? t("جارٍ إنشاء الأوردر…") : t("تأكيد الأوردر")}
                   </Button>
                 </CustomerAuthGate>
               ) : null}
@@ -1285,7 +1288,7 @@ function CartDrawer({
         {step !== "done" && cart.lines.length > 0 && (
           <div className="space-y-2 border-t p-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-xs text-muted-foreground">الإجمالي</span>
+              <span className="text-xs text-muted-foreground">{t("الإجمالي")}</span>
               <span className="font-semibold">{total.toFixed(2)} {currency ?? ""}</span>
             </div>
             <div className="flex gap-2">
@@ -1293,7 +1296,7 @@ function CartDrawer({
                 <Button variant="outline" className="flex-1" onClick={() =>
                   setStep(step === "shipping" ? "cart" : step === "payment" ? "shipping" : "payment")
                 }>
-                  رجوع
+                  {t("رجوع")}
                 </Button>
               )}
               {step !== "summary" && (
@@ -1305,7 +1308,7 @@ function CartDrawer({
                   (step === "shipping" && store.shipping.length > 0 && !shippingId) ||
                   (step === "payment" && store.paymentMethods.length > 0 && !paymentName)
                 }>
-                  {step === "cart" ? (stockCheck.isPending ? "جارٍ التحقق من المخزون…" : "إنشاء الأوردر") : "التالي"}
+                  {step === "cart" ? (stockCheck.isPending ? t("جارٍ التحقق من المخزون…") : t("إنشاء الأوردر")) : t("التالي")}
                 </Button>
 
               )}
@@ -1314,7 +1317,7 @@ function CartDrawer({
         )}
         {step === "done" && (
           <div className="border-t p-4">
-            <Button className="w-full" onClick={onClose}>إغلاق</Button>
+            <Button className="w-full" onClick={onClose}>{t("إغلاق")}</Button>
           </div>
         )}
       </div>

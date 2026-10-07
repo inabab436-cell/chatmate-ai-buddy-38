@@ -169,13 +169,16 @@ export function CustomerChat({
   const [locErr, setLocErr] = useState<string | null>(null);
 
   const [initErr, setInitErr] = useState<string | null>(null);
+  const [showLogin, setShowLogin] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const chatAiUrl = config.data?.chatAiUrl ?? null;
   const anonKey = config.data?.supabaseAnonKey ?? null;
 
   const session = useCustomerSession({ merchantId, visitorId, enabled: !ownerPreview });
-  const loggedIn = ownerPreview || !!session.data?.loggedIn;
+  const signedIn = ownerPreview || !!session.data?.loggedIn;
+  // Guests can chat without signing in; their visitor id keeps the session.
+  const loggedIn = true;
   const customerEmail = session.data?.email ?? null;
 
   const callEdge = useMemo(() => {
@@ -459,17 +462,25 @@ export function CustomerChat({
           </div>
         )}
 
-        {!ownerPreview && !notFound && merchantId && !loggedIn && !session.isLoading && (
-          <div className="mx-auto w-full max-w-md py-6">
-            <CustomerLoginPanel
-              merchantId={merchantId}
-              visitorId={visitorId}
-              brandName={brandName}
-              onSuccess={() => session.refetch()}
-            />
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              يجب تسجيل الدخول لعرض المحادثات والوصول إلى الطلبات.
-            </p>
+
+        {!ownerPreview && !notFound && merchantId && !signedIn && !session.isLoading && (
+          <div className="mx-auto w-full max-w-md pt-1">
+            {showLogin ? (
+              <CustomerLoginPanel
+                merchantId={merchantId}
+                visitorId={visitorId}
+                brandName={brandName}
+                onSuccess={() => { setShowLogin(false); void session.refetch(); }}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowLogin(true)}
+                className="w-full rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground"
+              >
+                تقدر تتكلم معانا مباشرة · سجّل دخولك لمتابعة طلباتك (اختياري)
+              </button>
+            )}
           </div>
         )}
 
