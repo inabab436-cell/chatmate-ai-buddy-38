@@ -2,12 +2,13 @@
  * Storefront language (Arabic default, English optional). Arabic source
  * strings are the keys; `t()` returns the English text when English is active.
  */
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 export type StoreLang = "ar" | "en";
 const KEY = "cupai_store_lang";
 let current: StoreLang = "ar";
 let loaded = false;
+let hydrated = false;
 const listeners = new Set<() => void>();
 
 function load() {
@@ -16,7 +17,7 @@ function load() {
   try { if (window.localStorage.getItem(KEY) === "en") current = "en"; } catch { /* ignore */ }
 }
 
-export function getStoreLang(): StoreLang { load(); return current; }
+export function getStoreLang(): StoreLang { if (!hydrated) return "ar"; load(); return current; }
 
 export function setStoreLang(lang: StoreLang) {
   current = lang;
@@ -25,6 +26,9 @@ export function setStoreLang(lang: StoreLang) {
 }
 
 export function useStoreLang(): StoreLang {
+  useEffect(() => {
+    if (!hydrated) { hydrated = true; load(); if (current !== "ar") listeners.forEach((l) => l()); }
+  }, []);
   return useSyncExternalStore(
     (cb) => { listeners.add(cb); return () => listeners.delete(cb); },
     getStoreLang,
