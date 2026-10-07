@@ -64,18 +64,7 @@ function AuthCallbackPage() {
       const accessToken = data.session?.access_token;
       if (!accessToken) throw new Error("لم يتم استلام جلسة من Google.");
 
-      const intent = readGoogleIntent() ?? { kind: "merchant" as const };
-
-      if (intent.kind === "customer") {
-        const res = await googleSignInCustomer({
-          data: { accessToken, merchant_id: intent.merchantId, visitor_id: intent.visitorId ?? null },
-        });
-        if (!res.ok) throw new Error(res.message);
-        clearGoogleIntent();
-        await supabase.auth.signOut();
-        window.location.replace(intent.returnTo || "/");
-        return;
-      }
+      readGoogleIntent();
 
       const res = await googleSignInMerchant({ data: { accessToken } });
       if (!res.ok) throw new Error(res.message);

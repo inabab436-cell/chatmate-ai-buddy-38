@@ -59,18 +59,4 @@ export const googleSignInMerchant = createServerFn({ method: "POST" })
       setupCompleted,
       nextRoute: setupCompleted ? "/dashboard" : "/welcome",
     };
-  });
-
-export const googleSignInCustomer = createServerFn({ method: "POST" })
-  .inputValidator(
-    (data: { accessToken: string; merchant_id: string; visitor_id?: string | null }) => ({
-      accessToken: ensureToken(data?.accessToken),
-      merchant_id: ensureUuid(data?.merchant_id, "merchant_id"),
-      visitor_id: data?.visitor_id ? String(data.visitor_id) : null,
-    }),
-  )
-  .handler(async ({ data }): Promise<CustomerOtpVerifyResult> => {
-    const user = await verifyGoogleToken(data.accessToken);
-    const { loginCustomerWithVerifiedEmail } = await import("@/lib/customer-auth.server");
-    return loginCustomerWithVerifiedEmail(data.merchant_id, user.email, data.visitor_id);
-  });
+});
