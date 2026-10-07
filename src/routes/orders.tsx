@@ -292,6 +292,25 @@ function OrdersPage() {
             </button>
           ))}
         </div>
+        <div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full"
+            disabled={visible.length === 0}
+            onClick={async () => {
+              try {
+                await exportOrdersToXlsx(visible);
+                toast.success(`تم تصدير ${visible.length} ${visible.length === 1 ? "طلب" : "طلب"} بنجاح.`);
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "فشل التصدير.");
+              }
+            }}
+          >
+            <Download className="ml-1 h-4 w-4" />
+            تصدير الأوردرات{filter !== "all" ? ` (${visible.length})` : ""}
+          </Button>
+        </div>
       </div>
 
       {q.isLoading ? (
