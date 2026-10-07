@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -208,115 +209,25 @@ function AccountBody({
   );
 }
 
-export function MerchantProfileMenu({ subscribed = false }: { subscribed?: boolean }) {
-  const isMobile = useIsMobile();
-  const fetchSession = useServerFn(getSessionInfo);
-  const doLogout = useServerFn(logout);
-  const doDelete = useServerFn(deleteAccount);
+export function MerchantProfileMenu(_props: { subscribed?: boolean } = {}) {
   const { data: site } = useSite();
-  const [email, setEmail] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    fetchSession().then((s) => setEmail(s.email)).catch(() => {});
-  }, [fetchSession]);
-
-  const onLogout = () => {
-    void doLogout().catch(() => {});
-    window.location.replace("/");
-  };
-
-  const onDelete = async () => {
-    setBusy(true);
-    try {
-      await doDelete();
-      window.location.replace("/");
-    } catch {
-      setBusy(false);
-      setConfirmOpen(false);
-    }
-  };
-
-  const trigger = (
-    <button
-      type="button"
+  return (
+    <Link
+      to="/account"
       className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pe-2.5 ps-1 shadow-card transition-colors hover:border-primary/40 hover:bg-muted/60"
-      aria-label="حسابك"
+      aria-label="حسابي"
     >
       <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
         {site?.logo_url ? (
           <img src={site.logo_url} alt="" className="h-full w-full object-cover" />
-        ) : site?.brand_name || email ? (
-          <span className="text-xs font-extrabold">
-            {(site?.brand_name ?? email ?? "").charAt(0).toUpperCase()}
-          </span>
+        ) : site?.brand_name ? (
+          <span className="text-xs font-extrabold">{site.brand_name.charAt(0).toUpperCase()}</span>
         ) : (
           <UserRound className="h-4 w-4" />
         )}
       </span>
-      <span className="text-sm font-bold">حسابك</span>
-      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-    </button>
-  );
-
-  const body = (
-    <AccountBody
-      email={email}
-      subscribed={subscribed}
-      site={site}
-      onLogout={onLogout}
-      onRequestDelete={() => { setOpen(false); setConfirmOpen(true); }}
-      busy={busy}
-    />
-  );
-
-  return (
-    <>
-      {isMobile ? (
-        <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-          <DrawerContent dir="rtl" className="hub-dashboard mx-auto max-h-[88vh] max-w-lg overflow-y-auto rounded-t-3xl border-border pb-2">
-            <DrawerHeader className="p-0 pb-1 pt-2 text-center">
-              <DrawerTitle className="sr-only">حسابك</DrawerTitle>
-            </DrawerHeader>
-            {body}
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-          <PopoverContent
-            align="end"
-            sideOffset={10}
-            className="w-[22rem] rounded-2xl border-border bg-card p-0 shadow-card"
-          >
-            {body}
-          </PopoverContent>
-        </Popover>
-      )}
-
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>حذف الحساب نهائيًا؟</AlertDialogTitle>
-            <AlertDialogDescription>
-              سيتم حذف حسابك وكل بيانات متجرك، ولا يمكن التراجع عن ذلك.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel disabled={busy}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={busy}
-              onClick={(e) => { e.preventDefault(); void onDelete(); }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {busy ? "جارٍ الحذف..." : "حذف الحساب"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+      <span className="text-sm font-bold">حسابي</span>
+      <ChevronDown className="h-3.5 w-3.5 -rotate-90 text-muted-foreground" />
+    </Link>
   );
 }

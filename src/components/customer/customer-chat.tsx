@@ -175,7 +175,9 @@ export function CustomerChat({
   const anonKey = config.data?.supabaseAnonKey ?? null;
 
   const session = useCustomerSession({ merchantId, visitorId, enabled: !ownerPreview });
-  const loggedIn = ownerPreview || !!session.data?.loggedIn;
+  const signedIn = ownerPreview || !!session.data?.loggedIn;
+  // Guests can chat without signing in; their visitor id keeps the session.
+  const loggedIn = true;
   const customerEmail = session.data?.email ?? null;
 
   const callEdge = useMemo(() => {
@@ -459,19 +461,6 @@ export function CustomerChat({
           </div>
         )}
 
-        {!ownerPreview && !notFound && merchantId && !loggedIn && !session.isLoading && (
-          <div className="mx-auto w-full max-w-md py-6">
-            <CustomerLoginPanel
-              merchantId={merchantId}
-              visitorId={visitorId}
-              brandName={brandName}
-              onSuccess={() => session.refetch()}
-            />
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              يجب تسجيل الدخول لعرض المحادثات والوصول إلى الطلبات.
-            </p>
-          </div>
-        )}
 
         {initErr && (
           <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
