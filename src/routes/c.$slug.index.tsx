@@ -25,6 +25,7 @@ import { CustomerAuthGate, useCustomerSession } from "@/components/customer/cust
 import { getStorefront, createStorefrontOrder, checkStorefrontStock, quoteStorefrontCart, type StorefrontData, type StorefrontAppliedOffer } from "@/lib/storefront.functions";
 import { saveCustomerDraft, clearCustomerDraft } from "@/lib/customer-orders.functions";
 import { THEMES } from "@/components/website/identity-section";
+import { t, useStoreLang, StoreLangToggle } from "@/lib/store-i18n";
 
 export const Route = createFileRoute("/c/$slug/")({
   head: ({ params }) => {
@@ -126,7 +127,7 @@ function BrandPageInner({ slug }: { slug: string }) {
         <div>
           <p className="store-display text-[120px]">404</p>
           <h1 className="store-label mt-2">{t("المتجر غير موجود")}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">لا يوجد متجر على الرابط /c/{slug}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("لا يوجد متجر على الرابط")} /c/{slug}</p>
         </div>
       </div>
     );
@@ -145,7 +146,7 @@ function BrandPageInner({ slug }: { slug: string }) {
         <div className="store-marquee flex w-max gap-12 whitespace-nowrap">
           {Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="store-label">
-              {onSale ? t("عروض لفترة محدودة · ") : ""}شحن لكل المحافظات · الدفع بالطريقة التي تناسبك
+              {onSale ? t("عروض لفترة محدودة · ") : ""}{t("شحن لكل المحافظات · الدفع بالطريقة التي تناسبك")}
             </span>
           ))}
         </div>
@@ -221,7 +222,7 @@ function BrandPageInner({ slug }: { slug: string }) {
       <main id="shop" className="mx-auto w-full max-w-7xl scroll-mt-20 px-4 py-14 sm:px-8">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
           <h2 className="store-display text-5xl sm:text-6xl">{category ?? t("كل المنتجات")}</h2>
-          <span className="store-label text-muted-foreground">{shown.length} قطعة</span>
+          <span className="store-label text-muted-foreground">{shown.length} {t("قطعة")}</span>
         </div>
         {categories.length > 0 && (
           <div className="-mx-4 mb-8 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
@@ -282,7 +283,7 @@ function BrandPageInner({ slug }: { slug: string }) {
             <p className="store-display text-5xl">{brandName}</p>
             {store.brandDescription && <p className="mt-3 max-w-xs text-sm opacity-70">{store.brandDescription}</p>}
           </div>
-          <FooterList kind="shipping" title={t("الشحن")} items={store.shipping.map((s) => ({ id: s.id, label: [s.country, s.region].filter(Boolean).join(" / ") || "الشحن" }))} onOpen={(id) => setOpenDetail({ kind: "shipping", id })} />
+          <FooterList kind="shipping" title={t("الشحن")} items={store.shipping.map((s) => ({ id: s.id, label: [s.country, s.region].filter(Boolean).join(" / ") || t("الشحن") }))} onOpen={(id) => setOpenDetail({ kind: "shipping", id })} />
           <FooterList kind="contact" title={t("تواصل معنا")} items={store.contacts.map((c) => ({ id: c.id, label: c.label || c.value }))} onOpen={(id) => setOpenDetail({ kind: "contact", id })} />
         </div>
         <div className="border-t border-primary-foreground/15 py-5 text-center">
@@ -360,20 +361,20 @@ function ProductOfferBox({
       </div>
       {plan.qualifies && plan.discountNow > 0 && (
         <div className="text-foreground">
-          وفّرت {plan.discountNow} {currency} على {quantity} {quantity === 1 ? t("قطعة") : t("قطع")} — الإجمالي {plan.totalNow} {currency}
+          {t("وفّرت")} {plan.discountNow} {currency} {t("على")} {quantity} {quantity === 1 ? t("قطعة") : t("قطع")} — {t("الإجمالي")} {plan.totalNow} {currency}
         </div>
       )}
       {nearMiss && (
         <div className="flex flex-wrap items-center gap-2">
           <span>
-            اشترِ {plan.unitsNeeded} {plan.unitsNeeded === 1 ? t("قطعة") : t("قطع")} ({plan.subtotalAtUnits} {currency}) وتوفّر {plan.discountAtUnits} {currency} — الإجمالي {plan.totalAtUnits} {currency}
+            {t("اشترِ")} {plan.unitsNeeded} {plan.unitsNeeded === 1 ? t("قطعة") : t("قطع")} ({plan.subtotalAtUnits} {currency}) {t("وتوفّر")} {plan.discountAtUnits} {currency} — {t("الإجمالي")} {plan.totalAtUnits} {currency}
           </span>
           <button
             type="button"
             onClick={() => onPickQty(plan.unitsNeeded)}
             className="rounded-full bg-destructive px-2 py-0.5 font-semibold text-destructive-foreground"
           >
-            اجعلها {plan.unitsNeeded}
+            {t("اجعلها")} {plan.unitsNeeded}
           </button>
         </div>
       )}
@@ -466,7 +467,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
   const cur = product.currency ?? "";
   const showLow = selectedStock != null && selectedStock > 0 && selectedStock <= LOW_STOCK_THRESHOLD;
   const addToCart = () => {
-    if (alreadyInCart) { toast.info("تمت الإضافة بالفعل"); return; }
+    if (alreadyInCart) { toast.info(t("تمت الإضافة بالفعل")); return; }
     cart.add({
       productId: product.id, name: product.name,
       price: unitPrice, currency: product.currency, image: img ?? null,
@@ -496,7 +497,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
             <span className="store-label bg-destructive px-2 py-1 text-destructive-foreground">{plan.badge}</span>
           )}
           {showLow && (
-            <span className="store-label bg-background px-2 py-1 text-foreground">آخر {selectedStock} قطع</span>
+            <span className="store-label bg-background px-2 py-1 text-foreground">{t("آخر")} {selectedStock} {t("قطع")}</span>
           )}
         </div>
         {outOfStock && (
@@ -545,7 +546,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
         )}
         {selectedStock != null && showLow && (
           <div className="flex items-center gap-1 text-[11px] font-semibold text-destructive">
-            <Flame className="h-3 w-3" /> متبقي {selectedStock} {selectedStock === 1 ? t("قطعة") : t("قطع")} فقط
+            <Flame className="h-3 w-3" /> {t("متبقي")} {selectedStock} {selectedStock === 1 ? t("قطعة") : t("قطع")} {t("فقط")}
           </div>
         )}
 
@@ -767,7 +768,7 @@ function OfferCountdown({ endsAt }: { endsAt: string }) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return (
     <span className="font-mono">
-      {d > 0 ? `${d} يوم · ` : ""}{pad(h)}:{pad(m)}:{pad(sec)}
+      {d > 0 ? `${d} ${t("يوم")} · ` : ""}{pad(h)}:{pad(m)}:{pad(sec)}
     </span>
   );
 }
@@ -903,12 +904,12 @@ function CartDrawer({
     onSuccess: (res) => {
       if (res.ok === false) {
         if (res.error === "login_required") {
-          toast.error("لازم تسجّل الدخول بالإيميل الأول عشان نقدر ننشئ الأوردر.");
+          toast.error(t("لازم تسجّل الدخول بالإيميل الأول عشان نقدر ننشئ الأوردر."));
           return;
         }
         // Server rejected on the LATEST stock — nothing was saved.
         setShortages(res.shortages ?? []);
-        toast.error("الكمية المطلوبة غير متاحة حالياً.");
+        toast.error(t("الكمية المطلوبة غير متاحة حالياً."));
         return;
       }
 
@@ -927,7 +928,7 @@ function CartDrawer({
           quantity: l.quantity, price: l.price, currency: l.currency,
         })),
         shippingLabel: shippingRow
-          ? [shippingRow.country, shippingRow.region].filter(Boolean).join(" / ") || "الشحن"
+          ? [shippingRow.country, shippingRow.region].filter(Boolean).join(" / ") || t("الشحن")
           : null,
         shippingPrice,
         subtotal: res.subtotal,
@@ -939,7 +940,7 @@ function CartDrawer({
       setStep("done");
     },
     onError: () => {
-      toast.error("تعذّر إنشاء الأوردر. الرجاء المحاولة مرة أخرى.");
+      toast.error(t("تعذّر إنشاء الأوردر. الرجاء المحاولة مرة أخرى."));
     },
   });
 
@@ -963,7 +964,7 @@ function CartDrawer({
     onSuccess: (res) => {
       if (res.ok === false) {
         setShortages(res.shortages ?? []);
-        toast.error("الكمية المطلوبة أكبر من المتاح في المخزون.");
+        toast.error(t("الكمية المطلوبة أكبر من المتاح في المخزون."));
         return;
       }
       setShortages([]);
@@ -1036,14 +1037,14 @@ function CartDrawer({
                   {receipt.requiresPayment ? t("تم تسجيل الأوردر — فاضل إتمام الدفع") : t("تم إنشاء الأوردر بنجاح ✅")}
                 </div>
                 <div className="mt-1 text-sm">{t("رقم الأوردر:")} <span className="font-mono">{receipt.orderNumber}</span></div>
-                <div className="mt-1 text-sm">الإجمالي: {receipt.total} {receipt.currency ?? ""}</div>
+                <div className="mt-1 text-sm">{t("الإجمالي")}: {receipt.total} {receipt.currency ?? ""}</div>
               </div>
 
               {receipt.requiresPayment ? (
                 <>
                   <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3">
-                    لن يُعتبر الأوردر مدفوعاً قبل تأكيد الدفع
-                    {receipt.paymentMethod ? ` عبر ${receipt.paymentMethod}` : ""}.
+                    {t("لن يُعتبر الأوردر مدفوعاً قبل تأكيد الدفع")}
+                    {receipt.paymentMethod ? ` ${t("عبر")} ${receipt.paymentMethod}` : ""}.
                   </p>
                   {(receipt.amountDue != null || receipt.paymentDetails) && (
                     <div className="space-y-2 rounded-lg border p-3">
@@ -1108,7 +1109,7 @@ function CartDrawer({
                     </>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">الشحن {receipt.shippingLabel ? `(${receipt.shippingLabel})` : ""}</span>
+                    <span className="text-muted-foreground">{t("الشحن")} {receipt.shippingLabel ? `(${receipt.shippingLabel})` : ""}</span>
                     <span>{receipt.shippingPrice.toFixed(2)} {receipt.currency ?? ""}</span>
                   </div>
                   {receipt.paymentMethod && (
@@ -1165,7 +1166,7 @@ function CartDrawer({
                       <label className={`flex cursor-pointer items-start gap-3 border p-3 transition ${shippingId === s.id ? "border-primary bg-secondary" : "border-border hover:border-foreground/40"}`}>
                         <input type="radio" name="shipping" checked={shippingId === s.id} onChange={() => setShippingId(s.id)} className="mt-1" />
                         <span className="flex-1">
-                          <span className="font-medium">{[s.country, s.region].filter(Boolean).join(" / ") || "الشحن"}</span>
+                          <span className="font-medium">{[s.country, s.region].filter(Boolean).join(" / ") || t("الشحن")}</span>
                           <span className="block text-xs text-muted-foreground">
                             {s.price != null ? `${s.price} ${s.currency ?? ""}` : t("سعر الشحن غير محدد")}
                             {s.eta ? ` · ${s.eta}` : ""}
@@ -1227,7 +1228,7 @@ function CartDrawer({
                     </>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">الشحن {shippingRow ? `(${[shippingRow.country, shippingRow.region].filter(Boolean).join(" / ")})` : ""}</span>
+                    <span className="text-muted-foreground">{t("الشحن")} {shippingRow ? `(${[shippingRow.country, shippingRow.region].filter(Boolean).join(" / ")})` : ""}</span>
                     <span>{shippingPrice.toFixed(2)} {currency ?? ""}</span>
                   </div>
                   <div className="flex justify-between border-t pt-2 font-semibold">
@@ -1267,7 +1268,7 @@ function CartDrawer({
                       <ul className="mt-1 space-y-0.5">
                         {shortages.map((s, i) => (
                           <li key={i}>
-                            {[s.product_name, s.color, s.size].filter(Boolean).join(" · ")} — المطلوب {s.requested} / المتاح {s.available}
+                            {[s.product_name, s.color, s.size].filter(Boolean).join(" · ")} — {t("المطلوب")} {s.requested} / {t("المتاح")} {s.available}
                           </li>
                         ))}
                       </ul>
