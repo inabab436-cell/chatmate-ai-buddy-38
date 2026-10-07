@@ -20,7 +20,6 @@ import {
   type LocationAttachment,
 } from "@/lib/chat-location";
 import {
-  CustomerLoginPanel,
   useCustomerSession,
 } from "@/components/customer/customer-login";
 
@@ -169,14 +168,12 @@ export function CustomerChat({
   const [locErr, setLocErr] = useState<string | null>(null);
 
   const [initErr, setInitErr] = useState<string | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const chatAiUrl = config.data?.chatAiUrl ?? null;
   const anonKey = config.data?.supabaseAnonKey ?? null;
 
   const session = useCustomerSession({ merchantId, visitorId, enabled: !ownerPreview });
-  const signedIn = ownerPreview || !!session.data?.loggedIn;
   // Guests can chat without signing in; their visitor id keeps the session.
   const loggedIn = true;
   const customerEmail = session.data?.email ?? null;
@@ -459,28 +456,6 @@ export function CustomerChat({
         {notFound && (
           <div className="hub-card p-6 text-center text-sm text-muted-foreground">
             المتجر غير موجود.
-          </div>
-        )}
-
-
-        {!ownerPreview && !notFound && merchantId && !signedIn && !session.isLoading && (
-          <div className="mx-auto w-full max-w-md pt-1">
-            {showLogin ? (
-              <CustomerLoginPanel
-                merchantId={merchantId}
-                visitorId={visitorId}
-                brandName={brandName}
-                onSuccess={() => { setShowLogin(false); void session.refetch(); }}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowLogin(true)}
-                className="w-full rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground"
-              >
-                تسجيل الدخول (اختياري)
-              </button>
-            )}
           </div>
         )}
 
