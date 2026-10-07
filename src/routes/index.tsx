@@ -148,7 +148,12 @@ function Index() {
         </section>
       </main>
 
-      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">© Cupai</footer>
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
+        <div className="flex flex-col items-center gap-1">
+          <span>© Cupai</span>
+          <a href="mailto:support.cupai@gmail.com" className="underline underline-offset-2 hover:text-foreground transition-colors">support.cupai@gmail.com</a>
+        </div>
+      </footer>
     </div>
   );
 }
