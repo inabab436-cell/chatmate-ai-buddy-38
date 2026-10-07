@@ -1,16 +1,14 @@
 /**
- * Google sign-in completion endpoints.
+ * Google sign-in completion endpoint (merchants only).
  *
  * The browser performs the Google OAuth handshake with Supabase Auth and sends
  * the resulting access token here. The token is validated server-side, then the
- * app's own session is established:
+ * app's own merchant session is established:
  *  - merchants  → encrypted `cupai_session` cookie + profile bootstrap
- *  - customers  → merchant-scoped `cupai_cs` customer session
  */
 import { createServerFn } from "@tanstack/react-start";
 
 import type { LoginResult } from "@/lib/auth-types";
-import type { CustomerOtpVerifyResult } from "@/lib/customer-auth-types";
 
 function ensureToken(value: unknown): string {
   const s = String(value ?? "").trim();
