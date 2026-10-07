@@ -1,3 +1,4 @@
+import { updateSession } from "@tanstack/react-start/server";
 /**
  * Merchant email + password authentication.
  *  - Sign-up: email code (OTP) verifies ownership, then the account is created with a password.
@@ -35,7 +36,6 @@ function cleanPassword(v: unknown): string {
 }
 
 async function startMerchantSession(userId: string, email: string): Promise<LoginResult> {
-  const { updateSession } = await import("@tanstack/react-start/server");
   const { getSessionConfig } = await import("@/lib/session.server");
   await updateSession(getSessionConfig(), { userId, email });
   const { ensureProfile, getSetupCompleted } = await import("@/lib/profile.server");
