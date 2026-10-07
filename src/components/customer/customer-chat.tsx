@@ -20,7 +20,6 @@ import {
   type LocationAttachment,
 } from "@/lib/chat-location";
 import {
-  CustomerLoginPanel,
   useCustomerSession,
 } from "@/components/customer/customer-login";
 
@@ -169,7 +168,6 @@ export function CustomerChat({
   const [locErr, setLocErr] = useState<string | null>(null);
 
   const [initErr, setInitErr] = useState<string | null>(null);
-  const [showLogin, setShowLogin] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const chatAiUrl = config.data?.chatAiUrl ?? null;
