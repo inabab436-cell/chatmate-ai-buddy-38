@@ -1,3 +1,4 @@
+import { getSession } from "@tanstack/react-start/server";
 /**
  * Store activation (pre-payment trial → paid plan). The merchant can only read
  * their own status and flag an activation request; turning `subscribed` on stays
@@ -11,7 +12,6 @@ export interface ActivationStatus {
 }
 
 async function currentUserId(): Promise<string> {
-  const { getSession } = await import("@tanstack/react-start/server");
   const { getSessionConfig } = await import("@/lib/session.server");
   const s = await getSession<{ userId: string }>(getSessionConfig());
   if (!s.data?.userId) throw new Error("You must be logged in.");

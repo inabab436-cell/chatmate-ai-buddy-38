@@ -1,3 +1,4 @@
+import { clearSession, getSession } from "@tanstack/react-start/server";
 /**
  * Auth server functions for cupai.
  *
@@ -14,7 +15,6 @@ import type { SessionInfo, SetupStatus } from "@/lib/auth-types";
 
 export const getSetupStatus = createServerFn({ method: "GET" }).handler(
   async (): Promise<SetupStatus> => {
-    const { getSession } = await import("@tanstack/react-start/server");
     const { getSessionConfig } = await import("@/lib/session.server");
     const session = await getSession<{ userId: string; email: string }>(
       getSessionConfig(),
@@ -27,7 +27,6 @@ export const getSetupStatus = createServerFn({ method: "GET" }).handler(
 
 export const completeSetup = createServerFn({ method: "POST" }).handler(
   async (): Promise<SetupStatus> => {
-    const { getSession } = await import("@tanstack/react-start/server");
     const { getSessionConfig } = await import("@/lib/session.server");
     const session = await getSession<{ userId: string; email: string }>(
       getSessionConfig(),
@@ -43,7 +42,6 @@ export const completeSetup = createServerFn({ method: "POST" }).handler(
 
 export const getSessionInfo = createServerFn({ method: "GET" }).handler(
   async (): Promise<SessionInfo> => {
-    const { getSession } = await import("@tanstack/react-start/server");
     const { getSessionConfig } = await import("@/lib/session.server");
     const session = await getSession<{ userId: string; email: string }>(
       getSessionConfig(),
@@ -62,14 +60,12 @@ export const getSessionInfo = createServerFn({ method: "GET" }).handler(
 );
 
 export const logout = createServerFn({ method: "POST" }).handler(async () => {
-  const { clearSession } = await import("@tanstack/react-start/server");
   const { getSessionConfig } = await import("@/lib/session.server");
   await clearSession(getSessionConfig());
   return { ok: true };
 });
 
 export const deleteAccount = createServerFn({ method: "POST" }).handler(async () => {
-  const { getSession, clearSession } = await import("@tanstack/react-start/server");
   const { getSessionConfig } = await import("@/lib/session.server");
   const session = await getSession<{ userId: string; email: string }>(getSessionConfig());
   const userId = session.data?.userId;

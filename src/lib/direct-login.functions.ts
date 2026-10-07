@@ -1,3 +1,4 @@
+import { updateSession } from "@tanstack/react-start/server";
 /**
  * TEMPORARY single-account sign-in (Google sign-in disabled).
  *
@@ -41,7 +42,6 @@ export const directSignIn = createServerFn({ method: "POST" }).handler(
       userId = data.user.id;
     }
 
-    const { updateSession } = await import("@tanstack/react-start/server");
     const { getSessionConfig } = await import("@/lib/session.server");
     await updateSession(getSessionConfig(), { userId, email: ALLOWED_EMAIL });
 

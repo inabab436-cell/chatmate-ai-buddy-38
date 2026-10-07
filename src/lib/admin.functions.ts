@@ -1,3 +1,4 @@
+import { clearSession, getSession, updateSession } from "@tanstack/react-start/server";
 /**
  * Platform admin console. Only ADMIN_EMAIL with the ADMIN_PASSWORD secret can
  * sign in. Every handler re-checks the admin session server-side.
@@ -29,7 +30,6 @@ async function adminSessionConfig() {
 }
 
 async function requireAdmin() {
-  const { getSession } = await import("@tanstack/react-start/server");
   const s = await getSession<{ admin?: boolean; email?: string }>(await adminSessionConfig());
   if (!s.data?.admin || s.data.email !== ADMIN_EMAIL) throw new Error("غير مصرح.");
 }
@@ -78,13 +78,11 @@ export const adminLogin = createServerFn({ method: "POST" })
       await new Promise((r) => setTimeout(r, 600));
       return { ok: false, message: "بيانات الدخول غير صحيحة." };
     }
-    const { updateSession } = await import("@tanstack/react-start/server");
     await updateSession(await adminSessionConfig(), { admin: true, email: ADMIN_EMAIL });
     return { ok: true, message: "" };
   });
 
 export const adminLogout = createServerFn({ method: "POST" }).handler(async () => {
-  const { clearSession } = await import("@tanstack/react-start/server");
   await clearSession(await adminSessionConfig());
   return { ok: true };
 });
@@ -185,7 +183,6 @@ export const impersonateMerchant = createServerFn({ method: "POST" })
     await requireAdmin();
     const { data: u, error } = await (await admin()).auth.admin.getUserById(data.id);
     if (error || !u.user) throw new Error("الحساب غير موجود.");
-    const { updateSession } = await import("@tanstack/react-start/server");
     const { getSessionConfig } = await import("@/lib/session.server");
     await updateSession(getSessionConfig(), { userId: u.user.id, email: u.user.email ?? "" });
     const { ensureProfile } = await import("@/lib/profile.server");

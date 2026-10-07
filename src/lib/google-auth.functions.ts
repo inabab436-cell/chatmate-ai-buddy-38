@@ -1,3 +1,4 @@
+import { updateSession } from "@tanstack/react-start/server";
 /**
  * Google sign-in completion endpoint (merchants only).
  *
@@ -43,7 +44,6 @@ export const googleSignInMerchant = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<LoginResult> => {
     const user = await verifyGoogleToken(data.accessToken);
 
-    const { updateSession } = await import("@tanstack/react-start/server");
     const { getSessionConfig } = await import("@/lib/session.server");
 
     await updateSession(getSessionConfig(), { userId: user.id, email: user.email });
