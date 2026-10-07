@@ -48,7 +48,7 @@ export function resolveVisitorId(
   fallbackVisitorId?: string | null,
 ): { visitorId: string; setCookieHeader: string | null } {
   const fromRequest = cookieValueFromRequest(request);
-  if (fromRequest) return { visitorId: fromRequest, setCookieHeader: null };
+  if (fromRequest) return { visitorId: fromRequest, setCookieHeader: visitorCookieHeader(fromRequest) };
 
   let fromContext: string | null = null;
   try {

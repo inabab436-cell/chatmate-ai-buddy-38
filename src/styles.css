@@ -775,3 +775,13 @@
 .hub-chat .chat-meta { color: var(--chat-meta); }
 .hub-chat .row-active { background: var(--chat-active); box-shadow: inset -3px 0 0 var(--hub-blue); }
 .hub-chat .chat-text { font-size: 15.5px; line-height: 1.75; }
+
+/* Google sign-in continuation */
+.auth-orbit-ring {
+  border: 2px solid color-mix(in oklab, var(--primary) 18%, transparent);
+  border-top-color: var(--primary);
+  animation: auth-spin 0.9s linear infinite;
+}
+.auth-dot { animation: auth-dot 1s ease-in-out infinite; }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+@keyframes auth-dot { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }

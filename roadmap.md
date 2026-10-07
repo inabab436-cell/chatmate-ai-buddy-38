@@ -1,7 +1,7 @@
 # Roadmap
 
 - [x] Open onboarding immediately after merchant registration, including Google registration.
-- [ ] Improve the Google continuation screen design — awaiting visual preferences and direction selection.
+- [x] Improve the Google continuation screen design
 
 - [ ] Audit and remove site-visible AI/agent references and explicit imagery; report exact changes without altering functionality.
 
@@ -24,3 +24,6 @@
 - [x] Redesign the merchant dashboard with a clean responsive sidebar and organized quick access
 - [x] Simplify add/edit product forms into colour groups with size quantities and one shared image upload
 - [x] Remove the earnings feature, dashboard card, page, navigation, and staff permission
+- [x] English language switch on the merchant storefront
+- [x] Merchant account as its own dashboard page with more settings
+- [x] Customers chat without signing in, with a long-lived remembered session
