@@ -401,9 +401,8 @@ function OrdersPage() {
             </button>
           ))}
         </div>
-        <div>
+        <div className="flex flex-col items-start gap-1">
           <Button
-            variant="outline"
             size="sm"
             className="rounded-full"
             disabled={visible.length === 0}
@@ -417,8 +416,12 @@ function OrdersPage() {
             }}
           >
             <Download className="ml-1 h-4 w-4" />
-            تصدير الأوردرات{filter !== "all" ? ` (${visible.length})` : ""}
+            تصدير الطلبات لشركة الشحن
+            {filter !== "all" ? ` (${visible.length})` : ""}
           </Button>
+          <span className="px-2 text-[11px] text-muted-foreground">
+            ملف Excel جاهز — بالاسم والهاتف والعنوان والمنتجات والمبلغ المطلوب تحصيله
+          </span>
         </div>
       </div>
 
