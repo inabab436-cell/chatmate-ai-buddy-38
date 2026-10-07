@@ -83,7 +83,10 @@ function fmtMoney(n: number): string {
  * one row per order, one column per data type, styled and wrapped.
  */
 async function exportOrdersToXlsx(orders: OrderRow[]) {
-  const ExcelJS = await import("exceljs");
+  // Browser-only build: keeps the Node version out of the live server bundle.
+  // @ts-expect-error no types for the prebuilt browser bundle
+  const mod = await import("exceljs/dist/exceljs.min.js");
+  const ExcelJS = (mod.default ?? mod) as typeof import("exceljs");
   const book = new ExcelJS.Workbook();
   const sheet = book.addWorksheet("الطلبات", {
     views: [{ rightToLeft: true, state: "frozen", ySplit: 1 }],
