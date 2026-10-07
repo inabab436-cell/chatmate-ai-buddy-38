@@ -459,28 +459,6 @@ export function CustomerChat({
           </div>
         )}
 
-
-        {!ownerPreview && !notFound && merchantId && !signedIn && !session.isLoading && (
-          <div className="mx-auto w-full max-w-md pt-1">
-            {showLogin ? (
-              <CustomerLoginPanel
-                merchantId={merchantId}
-                visitorId={visitorId}
-                brandName={brandName}
-                onSuccess={() => { setShowLogin(false); void session.refetch(); }}
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowLogin(true)}
-                className="w-full rounded-xl border border-border px-3 py-2 text-xs text-muted-foreground transition hover:text-foreground"
-              >
-                تسجيل الدخول (اختياري)
-              </button>
-            )}
-          </div>
-        )}
-
         {initErr && (
           <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
             {initErr}
