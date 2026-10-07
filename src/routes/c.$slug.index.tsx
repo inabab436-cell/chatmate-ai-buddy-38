@@ -25,7 +25,7 @@ import { CustomerAuthGate, useCustomerSession } from "@/components/customer/cust
 import { getStorefront, createStorefrontOrder, checkStorefrontStock, quoteStorefrontCart, type StorefrontData, type StorefrontAppliedOffer } from "@/lib/storefront.functions";
 import { saveCustomerDraft, clearCustomerDraft } from "@/lib/customer-orders.functions";
 import { THEMES } from "@/components/website/identity-section";
-import { t, useStoreLang, StoreLangToggle } from "@/lib/store-i18n";
+import { t, storeDir, useStoreLang, StoreLangToggle } from "@/lib/store-i18n";
 
 export const Route = createFileRoute("/c/$slug/")({
   head: ({ params }) => {
@@ -58,7 +58,8 @@ function BrandPageShell() {
 }
 
 function BrandPage({ slug }: { slug: string }) {
-  return <BrandPageInner slug={slug} />;
+  const lang = useStoreLang();
+  return <BrandPageInner key={lang} slug={slug} />;
 }
 
 /**
@@ -115,7 +116,7 @@ function BrandPageInner({ slug }: { slug: string }) {
 
   if (q.isLoading) {
     return (
-      <div dir="rtl" className="store grid min-h-screen place-items-center">
+      <div dir={storeDir()} className="store grid min-h-screen place-items-center">
         <span className="store-display animate-pulse text-5xl">{brandName}</span>
       </div>
     );
@@ -123,7 +124,7 @@ function BrandPageInner({ slug }: { slug: string }) {
   const store: StorefrontData | undefined = q.data;
   if (!store || !store.found) {
     return (
-      <div dir="rtl" className="store grid min-h-screen place-items-center px-6 text-center">
+      <div dir={storeDir()} className="store grid min-h-screen place-items-center px-6 text-center">
         <div>
           <p className="store-display text-[120px]">404</p>
           <h1 className="store-label mt-2">{t("المتجر غير موجود")}</h1>
@@ -140,7 +141,7 @@ function BrandPageInner({ slug }: { slug: string }) {
   const onSale = store.products.some((p) => (p.offers ?? []).length > 0);
 
   return (
-    <div dir="rtl" className="store min-h-screen">
+    <div dir={storeDir()} className="store min-h-screen">
       {/* Announcement bar */}
       <div className="overflow-hidden bg-primary py-2 text-primary-foreground">
         <div className="store-marquee flex w-max gap-12 whitespace-nowrap">
@@ -174,6 +175,7 @@ function BrandPageInner({ slug }: { slug: string }) {
             <span className="store-display truncate text-3xl sm:text-4xl">{brandName}</span>
           </Link>
           <div className="flex items-center justify-end gap-1">
+            <StoreLangToggle />
             <Link
               to="/c/$slug/track" params={{ slug }}
               className="store-label inline-flex h-10 items-center border-b border-foreground/30 pb-0.5 transition hover:border-foreground"
@@ -564,7 +566,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
         )}
       </div>
       {open && (
-        <div className="store fixed inset-0 z-50 flex bg-foreground/40 backdrop-blur-sm" dir="rtl" onClick={() => setOpen(false)}>
+        <div className="store fixed inset-0 z-50 flex bg-foreground/40 backdrop-blur-sm" dir={storeDir()} onClick={() => setOpen(false)}>
           <div className="mr-auto flex h-full w-full max-w-lg flex-col overflow-y-auto bg-background shadow-2xl animate-in slide-in-from-left duration-300" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b px-5 py-4">
               <span className="store-label">{t("تفاصيل المنتج")}</span>
@@ -660,7 +662,7 @@ function ColorSwatch({ label, image, active, onClick, small }: { label: string; 
 
 function showAddedToast(name: string, image: string | null) {
   toast.custom(() => (
-    <div dir="rtl" className="store flex w-[340px] items-center gap-3 border border-border bg-background p-3 text-foreground shadow-2xl">
+    <div dir={storeDir()} className="store flex w-[340px] items-center gap-3 border border-border bg-background p-3 text-foreground shadow-2xl">
       {image ? <img src={image} alt="" className="h-14 w-11 shrink-0 object-cover" /> : <ShoppingBag className="h-6 w-6 shrink-0" strokeWidth={1.5} />}
       <div className="min-w-0 flex-1">
         <p className="store-label">{t("تمت الإضافة للسلة ✓")}</p>
@@ -998,7 +1000,7 @@ function CartDrawer({
 
 
   return (
-    <div className="store fixed inset-0 z-50 flex" onClick={onClose} dir="rtl">
+    <div className="store fixed inset-0 z-50 flex" onClick={onClose} dir={storeDir()}>
       <div className="flex-1 bg-foreground/50 backdrop-blur-[2px]" />
       <div className="flex h-full w-full max-w-md flex-col bg-background shadow-2xl animate-in slide-in-from-left duration-300" onClick={(e) => e.stopPropagation()}>
         <div className="border-b p-4">
