@@ -26,14 +26,7 @@ export async function getBrowserSupabase(): Promise<SupabaseClient> {
   return cached;
 }
 
-export type GoogleIntent =
-  | { kind: "merchant" }
-  | {
-      kind: "customer";
-      merchantId: string;
-      visitorId?: string | null;
-      returnTo: string;
-    };
+export type GoogleIntent = { kind: "merchant" };
 
 const INTENT_KEY = "cupai-google-intent";
 

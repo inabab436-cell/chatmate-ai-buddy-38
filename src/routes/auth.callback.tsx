@@ -1,9 +1,9 @@
 /**
- * Google OAuth landing page.
+ * Google OAuth landing page (merchants only).
  *
  * Exchanges the OAuth code for a session in the browser, hands the access
- * token to the matching server function (merchant or storefront customer),
- * then continues to the intended destination.
+ * token to the merchant sign-in server function, then continues to the
+ * intended destination.
  */
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -13,7 +13,7 @@ import {
   getBrowserSupabase,
   readGoogleIntent,
 } from "@/lib/supabase-browser";
-import { googleSignInCustomer, googleSignInMerchant } from "@/lib/google-auth.functions";
+import { googleSignInMerchant } from "@/lib/google-auth.functions";
 import { ONBOARDING_DONE_KEY } from "@/lib/onboarding";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -64,18 +64,7 @@ function AuthCallbackPage() {
       const accessToken = data.session?.access_token;
       if (!accessToken) throw new Error("لم يتم استلام جلسة من Google.");
 
-      const intent = readGoogleIntent() ?? { kind: "merchant" as const };
-
-      if (intent.kind === "customer") {
-        const res = await googleSignInCustomer({
-          data: { accessToken, merchant_id: intent.merchantId, visitor_id: intent.visitorId ?? null },
-        });
-        if (!res.ok) throw new Error(res.message);
-        clearGoogleIntent();
-        await supabase.auth.signOut();
-        window.location.replace(intent.returnTo || "/");
-        return;
-      }
+      readGoogleIntent();
 
       const res = await googleSignInMerchant({ data: { accessToken } });
       if (!res.ok) throw new Error(res.message);

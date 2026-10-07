@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CartProvider, useCart } from "@/lib/cart";
-import { CustomerAuthGate, useCustomerSession } from "@/components/customer/customer-login";
+import { useCustomerSession } from "@/components/customer/customer-login";
 import { getStorefront, createStorefrontOrder, checkStorefrontStock, quoteStorefrontCart, type StorefrontData, type StorefrontAppliedOffer } from "@/lib/storefront.functions";
 import { saveCustomerDraft, clearCustomerDraft } from "@/lib/customer-orders.functions";
 import { THEMES } from "@/components/website/identity-section";
@@ -1244,7 +1244,7 @@ function CartDrawer({
               <AppliedOffers offers={appliedOffers} currency={currency} />
 
               {merchantId ? (
-                <CustomerAuthGate merchantId={merchantId} brandName={brandName} themePrimary="#111111">
+                <>
                   <div className="space-y-2">
                     <div>
                       <Label className="text-xs">{t("الاسم *")}</Label>
@@ -1279,7 +1279,7 @@ function CartDrawer({
                   <Button className="mt-3 w-full" disabled={mut.isPending || !canSubmit} onClick={() => mut.mutate()}>
                     <Send className="ml-1 h-4 w-4" /> {mut.isPending ? t("جارٍ إنشاء الأوردر…") : t("تأكيد الأوردر")}
                   </Button>
-                </CustomerAuthGate>
+                </>
               ) : null}
             </div>
           )}
