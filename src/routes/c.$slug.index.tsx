@@ -1244,7 +1244,7 @@ function CartDrawer({
               <AppliedOffers offers={appliedOffers} currency={currency} />
 
               {merchantId ? (
-                <CustomerAuthGate merchantId={merchantId} brandName={brandName} themePrimary="#111111">
+                <>
                   <div className="space-y-2">
                     <div>
                       <Label className="text-xs">{t("الاسم *")}</Label>
