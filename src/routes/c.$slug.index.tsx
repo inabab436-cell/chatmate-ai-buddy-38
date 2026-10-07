@@ -1279,7 +1279,7 @@ function CartDrawer({
                   <Button className="mt-3 w-full" disabled={mut.isPending || !canSubmit} onClick={() => mut.mutate()}>
                     <Send className="ml-1 h-4 w-4" /> {mut.isPending ? t("جارٍ إنشاء الأوردر…") : t("تأكيد الأوردر")}
                   </Button>
-                </CustomerAuthGate>
+                </>
               ) : null}
             </div>
           )}
