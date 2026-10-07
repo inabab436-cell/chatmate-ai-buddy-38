@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ChevronDown, Truck, PackageCheck, Package, Settings2, Info, XCircle,
-  Trash2, BadgeCheck, Phone, MapPin, StickyNote, Search,
+  Trash2, BadgeCheck, Phone, MapPin, StickyNote, Search, Download,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
