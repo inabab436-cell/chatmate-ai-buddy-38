@@ -78,36 +78,145 @@ function fmtMoney(n: number): string {
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100);
 }
 
-/** Export the given orders to a .xlsx file — one row per order, products and quantities joined in one cell. */
+/**
+ * Export orders as a shipping-company-ready .xlsx file:
+ * one row per order, one column per data type, styled and wrapped.
+ */
 async function exportOrdersToXlsx(orders: OrderRow[]) {
-  const XLSX = await import("xlsx");
-  const data = orders.map((o) => {
+  const ExcelJS = await import("exceljs");
+  const book = new ExcelJS.Workbook();
+  const sheet = book.addWorksheet("الطلبات", {
+    views: [{ rightToLeft: true, state: "frozen", ySplit: 1 }],
+  });
+
+  const headers = [
+    "رقم الأوردر",
+    "اسم العميل",
+    "رقم الهاتف",
+    "عنوان الشحن",
+    "المنتجات والكميات",
+    "المبلغ المطلوب تحصيله",
+    "ملاحظات الشحن",
+  ];
+  sheet.columns = headers.map((h) => ({ header: h, key: h, width: 16 }));
+
+  const wrappedCols = new Set(["عنوان الشحن", "المنتجات والكميات", "ملاحظات الشحن"]);
+  const colWidths: Record<string, number> = {
+    "رقم الأوردر": 14,
+    "اسم العميل": 20,
+    "رقم الهاتف": 16,
+    "عنوان الشحن": 38,
+    "المنتجات والكميات": 42,
+    "المبلغ المطلوب تحصيله": 18,
+    "ملاحظات الشحن": 28,
+  };
+
+  const rowsData = orders.map((o) => {
     const value = o.total_price != null ? Number(o.total_price) : Number(o.subtotal_price ?? 0);
-    const names = o.items.map((it) => {
-      const variant = [it.color, it.size].filter(Boolean).join(" · ");
-      return variant ? `${it.product_name ?? "—"} (${variant})` : (it.product_name ?? "—");
+    const products = o.items.map((it) => {
+      const variant = [it.color, it.size].filter(Boolean).join("، ");
+      const name = it.product_name ?? "—";
+      const qty = Number(it.quantity ?? 0);
+      return variant ? `${name} (${variant}) × ${qty}` : `${name} × ${qty}`;
     });
-    const quantities = o.items.map((it) => String(Number(it.quantity ?? 0)));
     return {
-      "رقم الأوردر": o.order_number ?? o.id.slice(0, 8),
-      "تاريخ الأوردر": fmtDate(o.created_at),
-      "اسم العميل": o.customer_name ?? "",
-      "رقم الهاتف": o.customer_phone ?? "",
-      "العنوان": o.customer_address ?? "",
-      "المنتجات": names.join("، "),
-      "الكميات": quantities.join("، "),
-      "إجمالي قيمة الأوردر": Number.isFinite(value) ? value : 0,
-      "طريقة الدفع": o.payment_method ?? "",
-      "ملاحظات العميل": o.notes ?? "",
+      order: o.order_number ?? o.id.slice(0, 8),
+      name: o.customer_name ?? "",
+      phone: o.customer_phone ?? "",
+      address: o.customer_address ?? "",
+      products: products.join("\n"),
+      amount: Number.isFinite(value) ? value : 0,
+      notes: o.notes ?? "",
     };
   });
-  const sheet = XLSX.utils.json_to_sheet(data);
-  // Right-to-left reading order so Arabic columns flow naturally.
-  (sheet as Record<string, unknown>)["!dir"] = "rtl";
-  const book = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(book, sheet, "الأوردرات");
+
+  for (const r of rowsData) {
+    sheet.addRow({
+      "رقم الأوردر": r.order,
+      "اسم العميل": r.name,
+      "رقم الهاتف": r.phone,
+      "عنوان الشحن": r.address,
+      "المنتجات والكميات": r.products,
+      "المبلغ المطلوب تحصيله": r.amount,
+      "ملاحظات الشحن": r.notes,
+    });
+  }
+
+  // Column widths: fit the content, capped so wrapped columns stay readable.
+  headers.forEach((h, i) => {
+    if (wrappedCols.has(h)) {
+      sheet.getColumn(i + 1).width = colWidths[h];
+      return;
+    }
+    let maxLen = h.length;
+    for (const r of rowsData) {
+      const v = String(
+        h === "رقم الأوردر" ? r.order : h === "اسم العميل" ? r.name : h === "رقم الهاتف" ? r.phone : r.amount,
+      );
+      maxLen = Math.max(maxLen, ...v.split("\n").map((l) => l.length));
+    }
+    sheet.getColumn(i + 1).width = Math.min(Math.max(maxLen + 4, 12), 45);
+  });
+
+  // Row heights: grow with the number of wrapped lines so nothing is clipped.
+  const linesNeeded = (text: string, width: number) =>
+    text.split("\n").reduce((n, line) => n + Math.max(1, Math.ceil(line.length / width)), 0);
+  sheet.eachRow((row, num) => {
+    if (num === 1) {
+      row.height = 26;
+      return;
+    }
+    const r = rowsData[num - 2];
+    const lines = Math.max(
+      linesNeeded(r.address, 34),
+      linesNeeded(r.products, 38),
+      linesNeeded(r.notes, 26),
+    );
+    row.height = Math.max(22, lines * 16 + 6);
+  });
+
+  // Styling: bold header on a dark fill, bordered cells, wrapped text.
+  const border = { style: "thin" as const, color: { argb: "FFD9D9D9" } };
+  sheet.getRow(1).eachCell((cell) => {
+    cell.font = { bold: true, size: 11, color: { argb: "FFFFFFFF" } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F2937" } };
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+    cell.border = { top: border, bottom: border, left: border, right: border };
+  });
+  headers.forEach((h, i) => {
+    const col = sheet.getColumn(i + 1);
+    col.eachCell((cell, num) => {
+      if (num === 1) return;
+      cell.border = { top: border, bottom: border, left: border, right: border };
+      if (h === "المبلغ المطلوب تحصيله") {
+        cell.alignment = { vertical: "top", horizontal: "center" };
+        cell.numFmt = "#,##0.00";
+      } else if (h === "رقم الهاتف") {
+        cell.numFmt = "@";
+        cell.alignment = { vertical: "top", horizontal: "center" };
+      } else if (h === "رقم الأوردر") {
+        cell.alignment = { vertical: "top", horizontal: "center" };
+      } else {
+        cell.alignment = {
+          vertical: "top",
+          horizontal: "right",
+          wrapText: wrappedCols.has(h),
+        };
+      }
+    });
+  });
+
   const date = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(book, `orders-${date}.xlsx`);
+  const buffer = await book.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `shipping-orders-${date}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 /**
