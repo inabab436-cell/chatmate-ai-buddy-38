@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CartProvider, useCart } from "@/lib/cart";
-import { CustomerAuthGate, useCustomerSession } from "@/components/customer/customer-login";
+import { useCustomerSession } from "@/components/customer/customer-login";
 import { getStorefront, createStorefrontOrder, checkStorefrontStock, quoteStorefrontCart, type StorefrontData, type StorefrontAppliedOffer } from "@/lib/storefront.functions";
 import { saveCustomerDraft, clearCustomerDraft } from "@/lib/customer-orders.functions";
 import { THEMES } from "@/components/website/identity-section";
