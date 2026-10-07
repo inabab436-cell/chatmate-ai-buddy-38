@@ -161,7 +161,33 @@ async function exportOrdersToXlsx(orders: OrderRow[]) {
   // Row heights: grow with the number of wrapped lines so nothing is clipped.
   const linesNeeded = (text: string, width: number) =>
     text.split("\n").reduce((n, line) => n + Math.max(1, Math.ceil(line.length / width)), 0);
-  sheet.eachRow((row, num) => {
+
+  // Styling: bold header on a dark fill, bordered cells, wrapped text.
+  const border = { style: "thin" as const, color: { argb: "FFD9D9D9" } };
+  sheet.eachRow({ includeEmpty: true }, (row, num) => {
+    row.eachCell({ includeEmpty: true }, (cell, colNum) => {
+      cell.border = { top: border, bottom: border, left: border, right: border };
+      const h = headers[colNum - 1];
+      if (num === 1) {
+        cell.font = { bold: true, size: 11, color: { argb: "FFFFFFFF" } };
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F2937" } };
+        cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+        return;
+      }
+      if (h === "المبلغ المطلوب تحصيله") {
+        cell.alignment = { vertical: "top", horizontal: "center" };
+        cell.numFmt = "#,##0.00";
+      } else if (h === "رقم الهاتف" || h === "رقم الأوردر") {
+        if (h === "رقم الهاتف") cell.numFmt = "@";
+        cell.alignment = { vertical: "top", horizontal: "center" };
+      } else {
+        cell.alignment = {
+          vertical: "top",
+          horizontal: "right",
+          wrapText: wrappedCols.has(h),
+        };
+      }
+    });
     if (num === 1) {
       row.height = 26;
       return;
@@ -173,37 +199,6 @@ async function exportOrdersToXlsx(orders: OrderRow[]) {
       linesNeeded(r.notes, 26),
     );
     row.height = Math.max(22, lines * 16 + 6);
-  });
-
-  // Styling: bold header on a dark fill, bordered cells, wrapped text.
-  const border = { style: "thin" as const, color: { argb: "FFD9D9D9" } };
-  sheet.getRow(1).eachCell((cell) => {
-    cell.font = { bold: true, size: 11, color: { argb: "FFFFFFFF" } };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1F2937" } };
-    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
-    cell.border = { top: border, bottom: border, left: border, right: border };
-  });
-  headers.forEach((h, i) => {
-    const col = sheet.getColumn(i + 1);
-    col.eachCell((cell, num) => {
-      if (num === 1) return;
-      cell.border = { top: border, bottom: border, left: border, right: border };
-      if (h === "المبلغ المطلوب تحصيله") {
-        cell.alignment = { vertical: "top", horizontal: "center" };
-        cell.numFmt = "#,##0.00";
-      } else if (h === "رقم الهاتف") {
-        cell.numFmt = "@";
-        cell.alignment = { vertical: "top", horizontal: "center" };
-      } else if (h === "رقم الأوردر") {
-        cell.alignment = { vertical: "top", horizontal: "center" };
-      } else {
-        cell.alignment = {
-          vertical: "top",
-          horizontal: "right",
-          wrapText: wrappedCols.has(h),
-        };
-      }
-    });
   });
 
   const date = new Date().toISOString().slice(0, 10);
