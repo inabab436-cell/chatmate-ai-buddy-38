@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ChevronDown, Truck, PackageCheck, Package, Settings2, Info, XCircle,
-  Trash2, BadgeCheck, Phone, MapPin, StickyNote, Search,
+  Trash2, BadgeCheck, Phone, MapPin, StickyNote, Search, Download,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,38 @@ function fmtDate(iso: string | null): string {
 
 function fmtMoney(n: number): string {
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100);
+}
+
+/** Export the given orders to a .xlsx file — one row per order, products and quantities joined in one cell. */
+async function exportOrdersToXlsx(orders: OrderRow[]) {
+  const XLSX = await import("xlsx");
+  const data = orders.map((o) => {
+    const value = o.total_price != null ? Number(o.total_price) : Number(o.subtotal_price ?? 0);
+    const names = o.items.map((it) => {
+      const variant = [it.color, it.size].filter(Boolean).join(" · ");
+      return variant ? `${it.product_name ?? "—"} (${variant})` : (it.product_name ?? "—");
+    });
+    const quantities = o.items.map((it) => String(Number(it.quantity ?? 0)));
+    return {
+      "رقم الأوردر": o.order_number ?? o.id.slice(0, 8),
+      "تاريخ الأوردر": fmtDate(o.created_at),
+      "اسم العميل": o.customer_name ?? "",
+      "رقم الهاتف": o.customer_phone ?? "",
+      "العنوان": o.customer_address ?? "",
+      "المنتجات": names.join("، "),
+      "الكميات": quantities.join("، "),
+      "إجمالي قيمة الأوردر": Number.isFinite(value) ? value : 0,
+      "طريقة الدفع": o.payment_method ?? "",
+      "ملاحظات العميل": o.notes ?? "",
+    };
+  });
+  const sheet = XLSX.utils.json_to_sheet(data);
+  // Right-to-left reading order so Arabic columns flow naturally.
+  (sheet as Record<string, unknown>)["!dir"] = "rtl";
+  const book = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(book, sheet, "الأوردرات");
+  const date = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(book, `orders-${date}.xlsx`);
 }
 
 /**
@@ -259,6 +291,25 @@ function OrdersPage() {
               {c.label}
             </button>
           ))}
+        </div>
+        <div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full"
+            disabled={visible.length === 0}
+            onClick={async () => {
+              try {
+                await exportOrdersToXlsx(visible);
+                toast.success(`تم تصدير ${visible.length} ${visible.length === 1 ? "طلب" : "طلب"} بنجاح.`);
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "فشل التصدير.");
+              }
+            }}
+          >
+            <Download className="ml-1 h-4 w-4" />
+            تصدير الأوردرات{filter !== "all" ? ` (${visible.length})` : ""}
+          </Button>
         </div>
       </div>
 
