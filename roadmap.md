@@ -27,3 +27,5 @@
 - [x] English language switch on the merchant storefront
 - [x] Merchant account as its own dashboard page with more settings
 - [x] Customers chat without signing in, with a long-lived remembered session
+- [x] Shipping-company Excel export button on the orders page
+- [x] Remove customer sign-in entirely (Google panel, OTP, login UI) — guests only, per owner decision
